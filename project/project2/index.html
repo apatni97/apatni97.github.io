@@ -7,7 +7,7 @@
     <meta name="author" content="Akshat Patni" />
     
     <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico">
-    <title>Project 2</title>
+    <title>Modeling, Testing, and Predicting: Diabetes Indicators amongst Pima Indian Females</title>
     <meta name="generator" content="Hugo 0.83.1" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="/css/main.css" />
@@ -54,13 +54,13 @@
       <div class="container">
         <div class="blog-post">
           <h3>
-            <strong><a href="/project/project2/">Project 2</a></strong>
+            <strong><a href="/project/project2/">Modeling, Testing, and Predicting: Diabetes Indicators amongst Pima Indian Females</a></strong>
           </h3>
         </div>
  
 <div class="blog-title">
           <h4>
-         December 1, 2020 
+         January 1, 0001 
             &nbsp;&nbsp;
             
           </h4>
@@ -73,8 +73,445 @@
 <script src="/rmarkdown-libs/header-attrs/header-attrs.js"></script>
 
 
-<div id="test-project-2" class="section level2">
-<h2>Test Project 2</h2>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p><strong>In this study, I found a dataset that contains several variables with medical statistics for a population of Pima Indian females. These numeric variables outline various health factors that can help indicate the likelihood of an individual having diabetes. These factors include their number of pregnancies, blood glucose levels, diastolic blood pressure, skin thickness (indicative of body fat), BMI, 2 hour serum insulin, BMI, age, and Diabetes Pedigree Function. The response variable is a binary categorical variable that indicates whether or not the individual tests positive for diabetes.</strong></p>
+<p><strong>The objective of this study is to analyze the correlations between the various predictor variables and understand which ones most strongly predict the outcome of a patient having diabetes. There are 9 variables total in the dataset with 767 observations made.</strong></p>
+<pre class="r"><code>library(tidyverse)
+library(dplyr)
+
+diab &lt;- read.csv(&quot;https://raw.githubusercontent.com/apatni97/CompProject2/main/pima-indians-diabetes%202.csv&quot;)
+
+diab &lt;- rename(diab, Pregnancies = X6)
+diab &lt;- rename(diab, Glucose = X148)
+diab &lt;- rename(diab, BloodPressure = X72)
+diab &lt;- rename(diab, SkinThickness = X35)
+diab &lt;- rename(diab, Insulin = X0)
+diab &lt;- rename(diab, BMI = X33.6)
+diab &lt;- rename(diab, Pedi = X0.627)
+diab &lt;- rename(diab, Age = X50)
+diab &lt;- rename(diab, Diagnosis = X1)</code></pre>
+</div>
+<div id="manova-and-univariate-anova-testing" class="section level2">
+<h2>MANOVA and univariate ANOVA testing</h2>
+<p><strong>I performed a MANOVA to test the mean difference of the numerical health variables across the patient diagnoses (positive or negative) and determine the relationship between the diagnosis and all of the different health factors. The test did prove to be significant, and thus we reject the null hypothesis and conclude that there is a significant difference based on positive or negative diagnosis. I subsequently ran 8 univariate ANOVA tests and 16 pairwise t tests to show the differing groups and the mean differences. The ANOVA tests also proved to be significant. Overall, I performed 25 tests total. The Bonferroni error rate was found to be .002, and the type 1 error rate was found to be .7226.</strong></p>
+<p><strong>For the MANOVA testing, it is likely that most of the assumptions were met. There were very few significant outliers and the data was taken with random samples from independent individuals. None of the variables are overly correlated with each other. Variance between groups isn’t equal but isn’t excessive either.</strong></p>
+<pre class="r"><code>diab %&gt;% group_by(Diagnosis) %&gt;% summarize(mean(Pregnancies), mean(Glucose),
+ mean(BloodPressure), mean(SkinThickness), mean(Insulin), mean(BMI), mean(Pedi), mean(Age))</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   Diagnosis `mean(Pregnancie… `mean(Glucose)` `mean(BloodPress… `mean(SkinThick…
+##       &lt;int&gt;             &lt;dbl&gt;           &lt;dbl&gt;             &lt;dbl&gt;            &lt;dbl&gt;
+## 1         0              3.30            110.              68.2             19.7
+## 2         1              4.86            141.              70.8             22.1
+## # … with 4 more variables: mean(Insulin) &lt;dbl&gt;, mean(BMI) &lt;dbl&gt;,
+## #   mean(Pedi) &lt;dbl&gt;, mean(Age) &lt;dbl&gt;</code></pre>
+<pre class="r"><code>diabmanova &lt;- manova(cbind(Pregnancies, Glucose, BloodPressure, SkinThickness, Insulin, BMI, Pedi, Age) ~ Diagnosis, data = diab)
+
+summary(diabmanova)</code></pre>
+<pre><code>##            Df  Pillai approx F num Df den Df    Pr(&gt;F)    
+## Diagnosis   1 0.30226   41.045      8    758 &lt; 2.2e-16 ***
+## Residuals 765                                             
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>summary.aov(diabmanova)</code></pre>
+<pre><code>##  Response Pregnancies :
+##              Df Sum Sq Mean Sq F value    Pr(&gt;F)    
+## Diagnosis     1  425.4  425.44  39.314 6.028e-10 ***
+## Residuals   765 8278.5   10.82                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response Glucose :
+##              Df Sum Sq Mean Sq F value    Pr(&gt;F)    
+## Diagnosis     1 169999  169999  212.04 &lt; 2.2e-16 ***
+## Residuals   765 613329     802                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response BloodPressure :
+##              Df Sum Sq Mean Sq F value  Pr(&gt;F)  
+## Diagnosis     1   1210 1209.63   3.234 0.07252 .
+## Residuals   765 286136  374.03                  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response SkinThickness :
+##              Df Sum Sq Mean Sq F value  Pr(&gt;F)  
+## Diagnosis     1   1047  1046.6  4.1285 0.04251 *
+## Residuals   765 193925   253.5                  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response Insulin :
+##              Df   Sum Sq Mean Sq F value   Pr(&gt;F)    
+## Diagnosis     1   177338  177338  13.562 0.000247 ***
+## Residuals   765 10002951   13076                     
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response BMI :
+##              Df Sum Sq Mean Sq F value    Pr(&gt;F)    
+## Diagnosis     1   4084  4084.3  71.679 &lt; 2.2e-16 ***
+## Residuals   765  43590    57.0                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response Pedi :
+##              Df Sum Sq Mean Sq F value    Pr(&gt;F)    
+## Diagnosis     1  2.526 2.52646  23.671 1.388e-06 ***
+## Residuals   765 81.650 0.10673                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response Age :
+##              Df Sum Sq Mean Sq F value    Pr(&gt;F)    
+## Diagnosis     1   5913  5913.3   45.29 3.333e-11 ***
+## Residuals   765  99884   130.6                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>pairwise.t.test(diab$Pregnancies, diab$Diagnosis, p.adj = &quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  diab$Pregnancies and diab$Diagnosis 
+## 
+##   0    
+## 1 6e-10
+## 
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>pairwise.t.test(diab$Glucose, diab$Diagnosis, p.adj = &quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  diab$Glucose and diab$Diagnosis 
+## 
+##   0     
+## 1 &lt;2e-16
+## 
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>pairwise.t.test(diab$BloodPressure, diab$Diagnosis, p.adj = &quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  diab$BloodPressure and diab$Diagnosis 
+## 
+##   0    
+## 1 0.073
+## 
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>pairwise.t.test(diab$SkinThickness, diab$Diagnosis, p.adj = &quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  diab$SkinThickness and diab$Diagnosis 
+## 
+##   0    
+## 1 0.043
+## 
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>pairwise.t.test(diab$Insulin, diab$Diagnosis, p.adj = &quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  diab$Insulin and diab$Diagnosis 
+## 
+##   0      
+## 1 0.00025
+## 
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>pairwise.t.test(diab$BMI, diab$Diagnosis, p.adj = &quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  diab$BMI and diab$Diagnosis 
+## 
+##   0     
+## 1 &lt;2e-16
+## 
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>pairwise.t.test(diab$Pedi, diab$Diagnosis, p.adj = &quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  diab$Pedi and diab$Diagnosis 
+## 
+##   0      
+## 1 1.4e-06
+## 
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>pairwise.t.test(diab$Age, diab$Diagnosis, p.adj = &quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  diab$Age and diab$Diagnosis 
+## 
+##   0      
+## 1 3.3e-11
+## 
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>bonferroni_ &lt;- .05/25
+type1rate_ &lt;- 1 - .95^(25)
+bonferroni_ </code></pre>
+<pre><code>## [1] 0.002</code></pre>
+<pre class="r"><code>type1rate_ </code></pre>
+<pre><code>## [1] 0.7226104</code></pre>
+</div>
+<div id="randomization-test" class="section level2">
+<h2>Randomization Test</h2>
+<p><strong>I performed a randomization test of mean differences because the diagnosis variable was categorical while the pregnancy variable was numeric. The test demonstrated the mean difference statistic for both conditions (either diabetes positive or negative). The mean difference for positive patients was significant while it was insignificant for negative patients, indicating a clear relationship between number of pregnancies and positive diabetes status.</strong></p>
+<pre class="r"><code>rand_dist&lt;-vector()
+
+for (i in 1:5000){
+  new&lt;- data.frame(preg=sample(diab$Pregnancies),diag1=diab$Diagnosis)
+  rand_dist[i]&lt;- mean(new[new$diag1==&quot;1&quot;,]$preg) - mean(new[new$diag1==&quot;0&quot;,]$preg)
+}
+
+mean(rand_dist &gt; mean(diab$Diagnosis==&quot;1&quot;)) * 2</code></pre>
+<pre><code>## [1] 0.1712</code></pre>
+<pre class="r"><code>mean(rand_dist &gt; mean(diab$Diagnosis==&quot;0&quot;)) * 2</code></pre>
+<pre><code>## [1] 0.0148</code></pre>
+</div>
+<div id="linear-regression" class="section level2">
+<h2>Linear Regression</h2>
+<p><strong>I performed a linear regression to see the effects of Glucose and Blood Pressure on BMI. I mean centered all 3 variables as they were numeric. After looking at the coefficient estimates, both Glucose and BP correlated positively with BMI, although the interaction between Glucose and BP produced a negative relationship.</strong></p>
+<p><strong>The assumptions of linearity and normality were met in this model. Heteroskedasticity was hard to determine visually, although the BP test showed a p value &lt; .05 therefore affirming that the assumption was met and the null hypothesis was rejected. After using robust standard errors in the regression, the p values remain less than .05 the conclusion does not change and the null hypothesis remains rejected. This shows that glucose and Blood Pressure are predictive of BMI, although the interaction between the two variables is not.</strong></p>
+<pre class="r"><code>library(lmtest)
+library(sandwich)
+library(ggplot2)
+
+diab$meanBMI &lt;- diab$BMI - mean(diab$BMI)
+diab$meanGlucose &lt;- diab$Glucose - mean(diab$Glucose)
+diab$meanBP &lt;- diab$BloodPressure - mean(diab$BloodPressure)
+
+regression &lt;- lm(diab$meanBMI~diab$meanGlucose*diab$meanBP, diab)
+summary(regression)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = diab$meanBMI ~ diab$meanGlucose * diab$meanBP, data = diab)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -34.922  -4.608  -0.201   4.523  30.989 
+## 
+## Coefficients:
+##                               Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)                   0.187950   0.269599   0.697    0.486    
+## diab$meanGlucose              0.047255   0.008436   5.601 2.97e-08 ***
+## diab$meanBP                   0.102960   0.013901   7.407 3.43e-13 ***
+## diab$meanGlucose:diab$meanBP -0.001992   0.000472  -4.222 2.72e-05 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 7.364 on 763 degrees of freedom
+## Multiple R-squared:  0.1321, Adjusted R-squared:  0.1287 
+## F-statistic: 38.71 on 3 and 763 DF,  p-value: &lt; 2.2e-16</code></pre>
+<pre class="r"><code>ggplot(regression, aes(diab$meanGlucose, diab$meanBMI)) + geom_point() + geom_smooth(method = &quot;lm&quot;)</code></pre>
+<p><img src="/project/project2_files/figure-html/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>bptest(regression)</code></pre>
+<pre><code>## 
+##  studentized Breusch-Pagan test
+## 
+## data:  regression
+## BP = 10.6, df = 3, p-value = 0.0141</code></pre>
+<pre class="r"><code>coeftest(regression,vcov=vcovHC(regression))</code></pre>
+<pre><code>## 
+## t test of coefficients:
+## 
+##                                 Estimate  Std. Error t value  Pr(&gt;|t|)    
+## (Intercept)                   0.18795008  0.26663214  0.7049  0.481085    
+## diab$meanGlucose              0.04725467  0.00811898  5.8203 8.649e-09 ***
+## diab$meanBP                   0.10296034  0.02190726  4.6998 3.089e-06 ***
+## diab$meanGlucose:diab$meanBP -0.00199251  0.00063277 -3.1489  0.001703 ** 
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+</div>
+<div id="logistic-regression-model-1" class="section level2">
+<h2>Logistic Regression Model 1</h2>
+<p><strong>I performed a logistic regression to see if the variables Glucose and Blood Pressure are predictive of a patient’s diabetes diagnosis. The coefficients demonstrate a positive effect, that higher values of Glucose and Blood Pressure correlate with a patient testing positive for diabetes. Glucose is slightly more positively correlated.</strong></p>
+<p><strong>The Sensitivity was found to be .487, and the Specificity was found to be .884. The precision was determined to be .6914. The AUC of the ROC plot was determined to be .7526 which is an OK or adequate value but not very good.</strong></p>
+<pre class="r"><code>fit1 &lt;- glm(Diagnosis ~ Glucose+BloodPressure, data=diab, family=binomial(link=&quot;logit&quot;))
+
+exp(coef(fit1))</code></pre>
+<pre><code>##   (Intercept)       Glucose BloodPressure 
+##   0.005227388   1.038679930   0.998432808</code></pre>
+<pre class="r"><code>library(ggplot2)
+library(plotROC)
+
+ROCplot1&lt;- ggplot(diab)+geom_roc(aes(d=Diagnosis,m=Glucose+BloodPressure), n.cuts=0) + geom_segment(aes(x=0,xend=1,y=0,yend=1),lty=2) 
+ROCplot1</code></pre>
+<p><img src="/project/project2_files/figure-html/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>calc_auc(ROCplot1)</code></pre>
+<pre><code>##   PANEL group      AUC
+## 1     1    -1 0.752618</code></pre>
+<pre class="r"><code>tdat&lt;-diab%&gt;%mutate(prob=predict(fit1, type=&quot;response&quot;), prediction=ifelse(prob&gt;.5,1,0))
+classify&lt;-tdat%&gt;%transmute(prob,prediction,truth=Diagnosis)
+classify</code></pre>
+<pre><code>##          prob prediction truth
+## 1  0.10606722          0     0
+## 2  0.83072004          1     1
+## 3  0.12134494          0     0
+## 4  0.47069688          0     1
+## 5  0.27535193          0     0
+## 6  0.08532377          0     1
+## 7  0.29120817          0     0
+## 8  0.89212536          1     1
+## 9  0.34060801          0     1
+## 10 0.22730857          0     0
+## 11 0.73219653          1     1
+## 12 0.47397788          0     0
+## 13 0.86113108          1     1
+## 14 0.71768984          1     1
+## 15 0.18865359          0     1
+## 16 0.28752826          0     1
+## 17 0.21262216          0     1
+## 18 0.19909130          0     0
+## 19 0.26907651          0     1
+## 20 0.35203914          0     0
+## 21 0.16403860          0     0
+## 22 0.88527068          1     1
+## 23 0.29667229          0     1
+## 24 0.50641512          1     1
+## 25 0.34982536          0     1
+## 26 0.55124343          1     1
+## 27 0.15760591          0     0
+## 28 0.53005975          1     0
+## 29 0.27729543          0     0
+## 30 0.22533216          0     0
+## 31 0.65093522          1     1
+## 32 0.11866239          0     0
+## 33 0.12935404          0     0
+##  [ reached &#39;max&#39; / getOption(&quot;max.print&quot;) -- omitted 734 rows ]</code></pre>
+<pre class="r"><code>table(prediction=classify$prediction,truth=classify$truth)%&gt;%addmargins()</code></pre>
+<pre><code>##           truth
+## prediction   0   1 Sum
+##        0   442 137 579
+##        1    58 130 188
+##        Sum 500 267 767</code></pre>
+<pre class="r"><code>TPR &lt;- 130 / 267 
+TNR &lt;- 442 / 500
+PPV &lt;- 130 / 188
+TPR</code></pre>
+<pre><code>## [1] 0.4868914</code></pre>
+<pre class="r"><code>TNR</code></pre>
+<pre><code>## [1] 0.884</code></pre>
+<pre class="r"><code>PPV</code></pre>
+<pre><code>## [1] 0.6914894</code></pre>
+</div>
+<div id="logistic-regression-model-continued" class="section level2">
+<h2>Logistic Regression Model Continued</h2>
+<p><strong>I performed a logistic regression predicting Diabetes diagnosis from all of the health factors. The AUC value was fairly good at around .84. The sensitivity was .58, specificity at .89, and precision at .74. </strong></p>
+<pre class="r"><code>fit2 &lt;-glm(Diagnosis~.,data=diab,family=&quot;binomial&quot;)
+prob &lt;- predict(fit2,type=&quot;response&quot;)
+
+class_diag(prob,diab$Diagnosis)</code></pre>
+<pre><code>##         acc      sens spec       ppv       auc
+## 1 0.7822686 0.5805243 0.89 0.7380952 0.8390637</code></pre>
+<pre class="r"><code>table(predict=as.numeric(prob&gt;.5),truth=diab$Diagnosis)%&gt;%addmargins</code></pre>
+<pre><code>##        truth
+## predict   0   1 Sum
+##     0   445 112 557
+##     1    55 155 210
+##     Sum 500 267 767</code></pre>
+<p><strong>Subsequently, I perfoemd a 10 fold cross-validation to find out of sample class diagnostic statistics. The AUC was slightly lower than the in sample value, at .82. The values for sensitivity, specificity, and precision were all slightly lower than the in sample metrics as well.</strong></p>
+<pre class="r"><code>set.seed(1234)
+k=10
+
+data&lt;-diab[sample(nrow(diab)),]
+folds&lt;-cut(seq(1:nrow(diab)),breaks=k,labels=F)
+
+diags&lt;-NULL
+for(i in 1:k){
+  
+  train&lt;-data[folds!=i,] 
+  test&lt;-data[folds==i,]
+  truth&lt;-test$Diagnosis
+  
+  fit3&lt;-glm(Diagnosis~.,data=train,family=&quot;binomial&quot;)
+  prob3 &lt;- predict(fit3,newdata = test,type=&quot;response&quot;)
+  
+  diags&lt;-rbind(diags,class_diag(prob3,truth))
+  
+}
+
+summarize_all(diags,mean)</code></pre>
+<pre><code>##         acc      sens      spec       ppv       auc
+## 1 0.7718387 0.5649954 0.8829649 0.7193941 0.8270645</code></pre>
+<p><strong>After performing a LASSO, the model retained the variables for Pregnancies, Glucose, BMI, Pedigree, and Age. BP, skin thickness, and insulin levels were dropped.</strong></p>
+<pre class="r"><code>library(glmnet)
+set.seed(1234)
+
+y&lt;-as.matrix(diab$Diagnosis)
+x&lt;-model.matrix(Diagnosis~.,data=diab)[,-1]
+x&lt;-scale(x) 
+
+cv&lt;-cv.glmnet(x,y,family=&quot;binomial&quot;)
+lasso&lt;-glmnet(x,y,family=&quot;binomial&quot;,lambda=cv$lambda.1se)
+coef(lasso)</code></pre>
+<pre><code>## 12 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
+##                          s0
+## (Intercept)   -7.669011e-01
+## Pregnancies    2.415250e-01
+## Glucose        8.500326e-01
+## BloodPressure  .           
+## SkinThickness  .           
+## Insulin        .           
+## BMI            3.879291e-01
+## Pedi           1.034209e-01
+## Age            5.243686e-02
+## meanBMI        6.470962e-05
+## meanGlucose    .           
+## meanBP         .</code></pre>
+<pre class="r"><code>lasso_dat &lt;- diab %&gt;% dplyr::select(Pregnancies,Glucose, BMI:Age, Diagnosis)
+
+data1 &lt;- lasso_dat %&gt;% sample_frac
+folds &lt;- ntile(1:nrow(data1),n=10)
+
+diags1&lt;-NULL
+for(i in 1:k){
+  train &lt;- data1[folds!=i,]
+  test &lt;- data1[folds==i,]
+  truth &lt;- test$Diagnosis
+  
+  fit4&lt;-glm(Diagnosis~.,data=train,family=&quot;binomial&quot;)
+  prob4 &lt;- predict(fit4,newdata = test,type=&quot;response&quot;)
+  
+  diags1&lt;-rbind(diags1,class_diag(prob4,truth))
+}
+
+diags1%&gt;%summarize_all(mean)</code></pre>
+<pre><code>##         acc      sens    spec      ppv       auc
+## 1 0.7654135 0.5619553 0.88422 0.715493 0.8371973</code></pre>
+<pre class="r"><code>table(predict=as.numeric(prob&gt;.5),truth=lasso_dat$Diagnosis)%&gt;%addmargins</code></pre>
+<pre><code>##        truth
+## predict   0   1 Sum
+##     0   445 112 557
+##     1    55 155 210
+##     Sum 500 267 767</code></pre>
+<p><strong>After perfroming a 10 fold CV on the variables that LASSO retained, I found an AUC value of around .83 which is close to the values found in the logistic regressions performed above.</strong></p>
+<pre class="r"><code>set.seed(1234)
+k=10
+
+data&lt;-lasso_dat[sample(nrow(lasso_dat)),]
+folds&lt;-cut(seq(1:nrow(lasso_dat)),breaks=k,labels=F)
+
+diags3&lt;-NULL
+for(i in 1:k){
+  
+  train&lt;-data[folds!=i,] 
+  test&lt;-data[folds==i,]
+  truth&lt;-test$Diagnosis
+  
+  fit5&lt;-glm(Diagnosis~.,data=train,family=&quot;binomial&quot;)
+  prob5 &lt;- predict(fit5,newdata = test,type=&quot;response&quot;)
+  
+  diags3&lt;-rbind(diags,class_diag(prob5,truth))
+  
+}
+
+summarize_all(diags3,mean)</code></pre>
+<pre><code>##         acc      sens      spec       ppv       auc
+## 1 0.7725098 0.5675042 0.8826954 0.7201104 0.8277691</code></pre>
+<p>…</p>
 </div>
 
             

@@ -15,5 +15,14 @@
       <description>Introduction In this study, I’ve applied some basic data manipulation and statistical methods to one of my favorite works of fiction, the Game of Thrones series by George R.R. Martin! In particular, I wanted to differentiate between the influence of characters between the books compared to the show, seeing as how the two stories have greatly diverged. I also wanted to see which characters were the most influential overall.</description>
     </item>
     
+    <item>
+      <title>Modeling, Testing, and Predicting: Diabetes Indicators amongst Pima Indian Females</title>
+      <link>/project/project2/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project2/</guid>
+      <description>Introduction In this study, I found a dataset that contains several variables with medical statistics for a population of Pima Indian females. These numeric variables outline various health factors that can help indicate the likelihood of an individual having diabetes. These factors include their number of pregnancies, blood glucose levels, diastolic blood pressure, skin thickness (indicative of body fat), BMI, 2 hour serum insulin, BMI, age, and Diabetes Pedigree Function.</description>
+    </item>
+    
   </channel>
 </rss>

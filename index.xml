@@ -28,6 +28,15 @@ summary(cars) ## speed dist ## Min. : 4.0 Min. : 2.00 ## 1st Qu.:12.0 1st Qu.: 2
     </item>
     
     <item>
+      <title>Modeling, Testing, and Predicting: Diabetes Indicators amongst Pima Indian Females</title>
+      <link>/project/project2/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project2/</guid>
+      <description>Introduction In this study, I found a dataset that contains several variables with medical statistics for a population of Pima Indian females. These numeric variables outline various health factors that can help indicate the likelihood of an individual having diabetes. These factors include their number of pregnancies, blood glucose levels, diastolic blood pressure, skin thickness (indicative of body fat), BMI, 2 hour serum insulin, BMI, age, and Diabetes Pedigree Function.</description>
+    </item>
+    
+    <item>
       <title>Projects</title>
       <link>/projects/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
