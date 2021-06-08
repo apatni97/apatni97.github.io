@@ -1,0 +1,306 @@
+---
+title: 'Modeling, Testing, and Predicting: Diabetes Indicators amongst Pima Indian Females'
+author: "Akshat Patni"
+date: ''
+output:
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+  pdf_document:
+    toc: no
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, fig.align = "center", warning = F, message = F,
+tidy=TRUE, tidy.opts=list(width.cutoff=60), R.options=list(max.print=100))
+
+class_diag<-function(probs,truth){
+  
+  tab<-table(factor(probs>.5,levels=c("FALSE","TRUE")),truth)
+  acc=sum(diag(tab))/sum(tab)
+  sens=tab[2,2]/colSums(tab)[2]
+  spec=tab[1,1]/colSums(tab)[1]
+  ppv=tab[2,2]/rowSums(tab)[2]
+
+  if(is.numeric(truth)==FALSE & is.logical(truth)==FALSE) truth<-as.numeric(truth)-1
+  
+  #CALCULATE EXACT AUC
+  ord<-order(probs, decreasing=TRUE)
+  probs <- probs[ord]; truth <- truth[ord]
+  
+  TPR=cumsum(truth)/max(1,sum(truth)) 
+  FPR=cumsum(!truth)/max(1,sum(!truth))
+  
+  dup<-c(probs[-1]>=probs[-length(probs)], FALSE)
+  TPR<-c(0,TPR[!dup],1); FPR<-c(0,FPR[!dup],1)
+  
+  n <- length(TPR)
+  auc<- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+
+  data.frame(acc,sens,spec,ppv,auc)
+}
+```
+
+
+```{R}
+```
+
+## Introduction
+
+**In this study, I found a dataset that contains several variables with medical statistics for a population of Pima Indian females. These numeric variables outline various health factors that can help indicate the likelihood of an individual having diabetes. These factors include their number of pregnancies, blood glucose levels, diastolic blood pressure, skin thickness (indicative of body fat), BMI, 2 hour serum insulin, BMI, age, and Diabetes Pedigree Function. The response variable is a binary categorical variable that indicates whether or not the individual tests positive for diabetes.**
+
+**The objective of this study is to analyze the correlations between the various predictor variables and understand which ones most strongly predict the outcome of a patient having diabetes. There are 9 variables total in the dataset with 767 observations made.**
+
+
+```{R}
+library(tidyverse)
+library(dplyr)
+
+diab <- read.csv("https://raw.githubusercontent.com/apatni97/CompProject2/main/pima-indians-diabetes%202.csv")
+
+diab <- rename(diab, Pregnancies = X6)
+diab <- rename(diab, Glucose = X148)
+diab <- rename(diab, BloodPressure = X72)
+diab <- rename(diab, SkinThickness = X35)
+diab <- rename(diab, Insulin = X0)
+diab <- rename(diab, BMI = X33.6)
+diab <- rename(diab, Pedi = X0.627)
+diab <- rename(diab, Age = X50)
+diab <- rename(diab, Diagnosis = X1)
+
+```
+
+
+## MANOVA and univariate ANOVA testing
+
+**I performed a MANOVA to test the mean difference of the numerical health variables across the patient diagnoses (positive or negative) and determine the relationship between the diagnosis and all of the different health factors. The test did prove to be significant, and thus we reject the null hypothesis and conclude that there is a significant difference based on positive or negative diagnosis. I subsequently ran 8 univariate ANOVA tests and 16 pairwise t tests to show the differing groups and the mean differences. The ANOVA tests also proved to be significant. Overall, I performed 25 tests total. The Bonferroni error rate was found to be .002, and the type 1 error rate was found to be .7226.**
+
+**For the MANOVA testing, it is likely that most of the assumptions were met. There were very few significant outliers and the data was taken with random samples from independent individuals. None of the variables are overly correlated with each other. Variance between groups isn't equal but isn't excessive either.**
+
+```{R}
+diab %>% group_by(Diagnosis) %>% summarize(mean(Pregnancies), mean(Glucose),
+ mean(BloodPressure), mean(SkinThickness), mean(Insulin), mean(BMI), mean(Pedi), mean(Age))
+
+diabmanova <- manova(cbind(Pregnancies, Glucose, BloodPressure, SkinThickness, Insulin, BMI, Pedi, Age) ~ Diagnosis, data = diab)
+
+summary(diabmanova)
+
+summary.aov(diabmanova)
+
+pairwise.t.test(diab$Pregnancies, diab$Diagnosis, p.adj = "none")
+pairwise.t.test(diab$Glucose, diab$Diagnosis, p.adj = "none")
+pairwise.t.test(diab$BloodPressure, diab$Diagnosis, p.adj = "none")
+pairwise.t.test(diab$SkinThickness, diab$Diagnosis, p.adj = "none")
+pairwise.t.test(diab$Insulin, diab$Diagnosis, p.adj = "none")
+pairwise.t.test(diab$BMI, diab$Diagnosis, p.adj = "none")
+pairwise.t.test(diab$Pedi, diab$Diagnosis, p.adj = "none")
+pairwise.t.test(diab$Age, diab$Diagnosis, p.adj = "none")
+
+bonferroni_ <- .05/25
+type1rate_ <- 1 - .95^(25)
+bonferroni_ 
+type1rate_ 
+
+```
+
+
+## Randomization Test 
+
+**I performed a randomization test of mean differences because the diagnosis variable was categorical while the pregnancy variable was numeric. The test demonstrated the mean difference statistic for both conditions (either diabetes positive or negative). The mean difference for positive patients was significant while it was insignificant for negative patients, indicating a clear relationship between number of pregnancies and positive diabetes status.**
+
+```{R}
+
+rand_dist<-vector()
+
+for (i in 1:5000){
+  new<- data.frame(preg=sample(diab$Pregnancies),diag1=diab$Diagnosis)
+  rand_dist[i]<- mean(new[new$diag1=="1",]$preg) - mean(new[new$diag1=="0",]$preg)
+}
+
+mean(rand_dist > mean(diab$Diagnosis=="1")) * 2
+mean(rand_dist > mean(diab$Diagnosis=="0")) * 2
+
+```
+
+## Linear Regression
+
+**I performed a linear regression to see the effects of Glucose and Blood Pressure on BMI. I mean centered all 3 variables as they were numeric. After looking at the coefficient estimates, both Glucose and BP correlated positively with BMI, although the interaction between Glucose and BP produced a negative relationship.**
+
+**The assumptions of linearity and normality were met in this model. Heteroskedasticity was hard to determine visually, although the BP test showed a p value < .05 therefore affirming that the assumption was met and the null hypothesis was rejected. After using robust standard errors in the regression, the p values remain less than .05 the conclusion does not change and the null hypothesis remains rejected. This shows that glucose and Blood Pressure are predictive of BMI, although the interaction between the two variables is not.**
+
+```{R}
+
+library(lmtest)
+library(sandwich)
+library(ggplot2)
+
+diab$meanBMI <- diab$BMI - mean(diab$BMI)
+diab$meanGlucose <- diab$Glucose - mean(diab$Glucose)
+diab$meanBP <- diab$BloodPressure - mean(diab$BloodPressure)
+
+regression <- lm(diab$meanBMI~diab$meanGlucose*diab$meanBP, diab)
+summary(regression)
+
+ggplot(regression, aes(diab$meanGlucose, diab$meanBMI)) + geom_point() + geom_smooth(method = "lm")
+
+bptest(regression)
+coeftest(regression,vcov=vcovHC(regression))
+
+
+```
+
+
+```{R}
+```
+
+## Logistic Regression Model 1
+
+**I performed a logistic regression to see if the variables Glucose and Blood Pressure are predictive of a patient's diabetes diagnosis. The coefficients demonstrate a positive effect, that higher values of Glucose and Blood Pressure correlate with a patient testing positive for diabetes. Glucose is slightly more positively correlated.** 
+
+**The Sensitivity was found to be .487, and the Specificity was found to be .884. The precision was determined to be .6914. The AUC of the ROC plot was determined to be .7526 which is an OK or adequate value but not very good.**
+
+```{R}
+
+fit1 <- glm(Diagnosis ~ Glucose+BloodPressure, data=diab, family=binomial(link="logit"))
+
+exp(coef(fit1))
+
+library(ggplot2)
+library(plotROC)
+
+ROCplot1<- ggplot(diab)+geom_roc(aes(d=Diagnosis,m=Glucose+BloodPressure), n.cuts=0) + geom_segment(aes(x=0,xend=1,y=0,yend=1),lty=2) 
+ROCplot1
+
+calc_auc(ROCplot1)
+
+tdat<-diab%>%mutate(prob=predict(fit1, type="response"), prediction=ifelse(prob>.5,1,0))
+classify<-tdat%>%transmute(prob,prediction,truth=Diagnosis)
+classify
+
+table(prediction=classify$prediction,truth=classify$truth)%>%addmargins()
+
+TPR <- 130 / 267 
+TNR <- 442 / 500
+PPV <- 130 / 188
+TPR
+TNR
+PPV
+```
+
+
+## Logistic Regression Model Continued
+
+**I performed a logistic regression predicting Diabetes diagnosis from all of the health factors. The AUC value was fairly good at around .84. The sensitivity was .58, specificity at .89, and precision at .74. **
+
+```{R}
+
+fit2 <-glm(Diagnosis~.,data=diab,family="binomial")
+prob <- predict(fit2,type="response")
+
+class_diag(prob,diab$Diagnosis)
+
+table(predict=as.numeric(prob>.5),truth=diab$Diagnosis)%>%addmargins
+
+```
+
+**Subsequently, I perfoemd a 10 fold cross-validation to find out of sample class diagnostic statistics. The AUC was slightly lower than the in sample value, at .82. The values for sensitivity, specificity, and precision were all slightly lower than the in sample metrics as well.**
+
+```{R}
+set.seed(1234)
+k=10
+
+data<-diab[sample(nrow(diab)),]
+folds<-cut(seq(1:nrow(diab)),breaks=k,labels=F)
+
+diags<-NULL
+for(i in 1:k){
+  
+  train<-data[folds!=i,] 
+  test<-data[folds==i,]
+  truth<-test$Diagnosis
+  
+  fit3<-glm(Diagnosis~.,data=train,family="binomial")
+  prob3 <- predict(fit3,newdata = test,type="response")
+  
+  diags<-rbind(diags,class_diag(prob3,truth))
+  
+}
+
+summarize_all(diags,mean)
+```
+
+**After performing a LASSO, the model retained the variables for Pregnancies, Glucose, BMI, Pedigree, and Age. BP, skin thickness, and insulin levels were dropped.**
+
+```{R}
+
+library(glmnet)
+set.seed(1234)
+
+y<-as.matrix(diab$Diagnosis)
+x<-model.matrix(Diagnosis~.,data=diab)[,-1]
+x<-scale(x) 
+
+cv<-cv.glmnet(x,y,family="binomial")
+lasso<-glmnet(x,y,family="binomial",lambda=cv$lambda.1se)
+coef(lasso)
+
+lasso_dat <- diab %>% dplyr::select(Pregnancies,Glucose, BMI:Age, Diagnosis)
+
+data1 <- lasso_dat %>% sample_frac
+folds <- ntile(1:nrow(data1),n=10)
+
+diags1<-NULL
+for(i in 1:k){
+  train <- data1[folds!=i,]
+  test <- data1[folds==i,]
+  truth <- test$Diagnosis
+  
+  fit4<-glm(Diagnosis~.,data=train,family="binomial")
+  prob4 <- predict(fit4,newdata = test,type="response")
+  
+  diags1<-rbind(diags1,class_diag(prob4,truth))
+}
+
+diags1%>%summarize_all(mean)
+
+table(predict=as.numeric(prob>.5),truth=lasso_dat$Diagnosis)%>%addmargins
+
+```
+
+**After perfroming a 10 fold CV on the variables that LASSO retained, I found an AUC value of around .83 which is close to the values found in the logistic regressions performed above.**
+
+```{R}
+
+set.seed(1234)
+k=10
+
+data<-lasso_dat[sample(nrow(lasso_dat)),]
+folds<-cut(seq(1:nrow(lasso_dat)),breaks=k,labels=F)
+
+diags3<-NULL
+for(i in 1:k){
+  
+  train<-data[folds!=i,] 
+  test<-data[folds==i,]
+  truth<-test$Diagnosis
+  
+  fit5<-glm(Diagnosis~.,data=train,family="binomial")
+  prob5 <- predict(fit5,newdata = test,type="response")
+  
+  diags3<-rbind(diags,class_diag(prob5,truth))
+  
+}
+
+summarize_all(diags3,mean)
+
+```
+
+
+...
+
+
+
+
+

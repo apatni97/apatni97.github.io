@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Akshat Patni" />
+    
+    <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico">
+    <title>Exploratory Data Analysis: Game of Thrones Characters</title>
+    <meta name="generator" content="Hugo 0.83.1" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="/css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="/post/">BLOG</a></li>
+        
+        <li><a href="/projects/">PROJECTS</a></li>
+        
+        <li><a href="/resume/">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="/project/project1/">Exploratory Data Analysis: Game of Thrones Characters</a></strong>
+          </h3>
+        </div>
+ 
+<div class="blog-title">
+          <h4>
+         January 1, 0001 
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+<script src="/rmarkdown-libs/header-attrs/header-attrs.js"></script>
+
+
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>In this study, I’ve applied some basic data manipulation and statistical methods to one of my favorite works of fiction, the Game of Thrones series by George R.R. Martin! In particular, I wanted to differentiate between the influence of characters between the books compared to the show, seeing as how the two stories have greatly diverged. I also wanted to see which characters were the most influential overall.</p>
+<p>I combined 4 datasets I found online with information on the Game of Thrones TV series and the ASOIAF novel series. These datasets consisted of variables such as wordcount, screentime, number of episodes, number of chapters, etc. These variables demonstrate the amount of focus each character gets in the books and/or the show. Analysis of this data will show which characters are the most important as well as how certain characters will have no book POV chapters, but became main characters in the show.</p>
+<pre class="r"><code>library(tidyverse)
+library(dplyr)
+got1 &lt;- read.csv(&quot;https://raw.githubusercontent.com/apatni97/CompProject1/main/got1.csv&quot;)
+got2 &lt;- read.csv(&quot;https://raw.githubusercontent.com/apatni97/CompProject1/main/got2.csv&quot;)
+got3 &lt;- read.csv(&quot;https://raw.githubusercontent.com/apatni97/CompProject1/main/got3.csv&quot;)
+got4 &lt;- read.csv(&quot;https://raw.githubusercontent.com/apatni97/CompProject1/main/got4.csv&quot;)
+
+got5 &lt;- got1 %&gt;% full_join(got2)
+got6 &lt;- got3 %&gt;% full_join(got4)</code></pre>
+</div>
+<div id="joining-and-tidying-data" class="section level2">
+<h2>Joining and Tidying Data</h2>
+<p>In order to perform statistical analysis, I had to use R libraries for data wrangling (dplyr, tidyverse) in order to manipulate, reorganize, and clean the datasets. This way I could collect all the data into a single dataframe so that I can analyze all characters together, as well as quickly filter out non-POV characters.</p>
+<p>I performed a full join on the datasets because there are many rows containing NA’s that are still important to the study. For example, certain characters have data only for their show appearances but not for their book appearances because they were not POV characters. Other characters are POV characters in both the books and the TV show. I distinguish between these two conditions later on as I manipulate and analyze the data. Since this was a full_join, no cases were dropped.</p>
+<p>I also had to use a function to merge some duplicate rows together so that there were no NA’s and each character had all of their data points. I used the dplyr function <em>group_by</em> to merge the duplicates by name.</p>
+<pre class="r"><code>got7 &lt;- got5 %&gt;% full_join(got6)
+
+got7 &lt;- got7 %&gt;% dplyr::select(-first, -second, -third, -fourth, -fifth, -imdb_url, -portrayed_by_name, -X, -X.1, -X.2, -X.3, -X.4, -X.5, -X.6, -X.7)
+got7 &lt;- got7 %&gt;% rename(WordCount=total)
+
+sum_NA &lt;- function(x) {if (all(is.na(x))) x[NA_integer_] else sum(x, na.rm = TRUE)}
+
+got7B &lt;- got7 %&gt;% group_by(Name) %&gt;% summarise_if(is.numeric, funs(sum_NA))
+
+got7B &lt;- got7B[!(got7B$Name==&quot;Eddard &#39;Ned&#39; Stark&quot;),]
+
+got7B &lt;- got7B %&gt;% group_by(Name)
+got7B[got7B$Name==&#39;Daenerys Targaryan&#39;, &quot;first_appearance&quot;] &lt;- 2011
+got7B[got7B$Name==&#39;Daenerys Targaryan&#39;, &quot;episodes_appeared&quot;] &lt;- 62
+got7B[got7B$Name==&#39;Daenerys Targaryan&#39;, &quot;last_appearance&quot;] &lt;- 2019
+got7B[got7B$Name==&#39;Daenerys Targaryan&#39;, &quot;first_appearance&quot;] &lt;- 2011
+got7B[got7B$Name==&#39;Daenerys Targaryan&#39;, &quot;Total.Pages&quot;] &lt;- 434
+got7B[got7B$Name==&#39;Daenerys Targaryan&#39;, &quot;Total.Chapters&quot;] &lt;- 31
+got7B[got7B$Name==&#39;Daenerys Targaryan&#39;, &quot;Total.Pages..GOT.&quot;] &lt;- 112
+got7B[got7B$Name==&#39;Daenerys Targaryan&#39;, &quot;Total.Chapters..GOT.&quot;] &lt;- 10
+got7B[got7B$Name==&#39;Daenerys Targaryan&#39;, &quot;Total.Pages..COK.&quot;] &lt;- 66
+got7B[got7B$Name==&#39;Daenerys Targaryan&#39;, &quot;Total.Chapters..COK.&quot;] &lt;- 5
+got7B[got7B$Name==&#39;Daenerys Targaryan&#39;, &quot;Total.Pages..SOS.&quot;] &lt;- 109
+got7B[got7B$Name==&#39;Daenerys Targaryan&#39;, &quot;Total.Chapters..SOS.&quot;] &lt;- 6
+got7B[got7B$Name==&#39;Daenerys Targaryan&#39;, &quot;Total.Pages..FFC.&quot;] &lt;- 0
+got7B[got7B$Name==&#39;Daenerys Targaryan&#39;, &quot;Total.Chapters..FFC.&quot;] &lt;- 0
+got7B[got7B$Name==&#39;Daenerys Targaryan&#39;, &quot;Total.Pages..DWD.&quot;] &lt;- 147
+got7B[got7B$Name==&#39;Daenerys Targaryan&#39;, &quot;Total.Chapters..DWD.&quot;] &lt;- 10
+got7B[got7B$Name==&#39;Daenerys Targaryan&#39;, &quot;screentime&quot;] &lt;- 221.3
+
+
+got7B[got7B$Name==&#39;Catelyn Stark&#39;, &quot;Total.Pages&quot;] &lt;- 333
+got7B[got7B$Name==&#39;Catelyn Stark&#39;, &quot;Total.Chapters&quot;] &lt;- 25
+got7B[got7B$Name==&#39;Catelyn Stark&#39;, &quot;Total.Pages..GOT.&quot;] &lt;- 127
+got7B[got7B$Name==&#39;Catelyn Stark&#39;, &quot;Total.Chapters..GOT.&quot;] &lt;- 11
+got7B[got7B$Name==&#39;Catelyn Stark&#39;, &quot;Total.Pages..COK.&quot;] &lt;- 110
+got7B[got7B$Name==&#39;Catelyn Stark&#39;, &quot;Total.Chapters..COK.&quot;] &lt;- 7
+got7B[got7B$Name==&#39;Catelyn Stark&#39;, &quot;Total.Pages..SOS.&quot;] &lt;- 96
+got7B[got7B$Name==&#39;Catelyn Stark&#39;, &quot;Total.Chapters..SOS.&quot;] &lt;- 7
+got7B[got7B$Name==&#39;Catelyn Stark&#39;, &quot;Total.Pages..FFC.&quot;] &lt;- 0
+got7B[got7B$Name==&#39;Catelyn Stark&#39;, &quot;Total.Chapters..FFC.&quot;] &lt;- 0
+got7B[got7B$Name==&#39;Catelyn Stark&#39;, &quot;Total.Pages..DWD.&quot;] &lt;- 0
+got7B[got7B$Name==&#39;Catelyn Stark&#39;, &quot;Total.Chapters..DWD.&quot;] &lt;- 0
+
+got7B[got7B$Name==&#39;Eddard Stark&#39;, &quot;first_appearance&quot;] &lt;- 2011
+got7B[got7B$Name==&#39;Eddard Stark&#39;, &quot;episodes_appeared&quot;] &lt;- 10
+got7B[got7B$Name==&#39;Eddard Stark&#39;, &quot;last_appearance&quot;] &lt;- 2011
+got7B[got7B$Name==&#39;Eddard Stark&#39;, &quot;screentime&quot;] &lt;- 99.45</code></pre>
+</div>
+<div id="data-wrangling-and-summary-statistics" class="section level2">
+<h2>Data Wrangling and Summary Statistics</h2>
+<p>I manipulated and organized the data using dplyr functions in order to show certain relationships between the variables under certain conditions. First, I ommitted rows with NA’s to create a new dataset with only POV characters from both the books and the show (the list is small) and showed which book POV characters have the most screentime in the show. I also did this with non-book POV characters using dplyr functions <em>filter</em> and <em>arrange</em> to show which characters on the show had the most screentime without having any POV chapters in the books.</p>
+<p>I also made summary statistic for screentime and word count to show which of the main characters had the most lines and which were on screen the most. The results were expected, showing characters like Tyrion having many lines while he was on screen, whereas action characters such as Jon Snow have a lot of screentime but relatively fewer dialogue. I used dplyr function <em>mutate</em> to create new variables that show the ratio between WordCount and screentime for the POV characters, as well as to see how long the POV chapters tend to be for each character.</p>
+<p>It was not surprising to find that Tyrion was the character with the max word count at 233876 words. Of all the main characters, Catelyn Stark had the highest wordcount in the books relative to her screentime in the show, while Melisandre had the lowest. This isn’t surprising as Melisandre was a less impactful POV character in the books while she was one of the main characters in the show. Brienne of Tarth had the longest chapters on average, while Ned Stark had the shortest chapters. I believe this is due to the fact that chapters were shorter on average in the earlier books of the series when Eddard was alive, and then by the 4th book (A Feast for Crows) the chapters became much longer and that is when Brienne of Tarth became a POV character.</p>
+<pre class="r"><code>#Book and Show POV characters organized by screentime
+got7_pov &lt;- got7B %&gt;% arrange(desc(screentime)) %&gt;% na.omit()
+head(got7_pov)</code></pre>
+<pre><code>## # A tibble: 6 x 18
+## # Groups:   Name [6]
+##   Name   episodes_appear… first_appearance last_appearance WordCount Total.Pages
+##   &lt;chr&gt;             &lt;int&gt;            &lt;int&gt;           &lt;int&gt;     &lt;int&gt;       &lt;int&gt;
+## 1 Tyrio…               67             2011            2019    233876         649
+## 2 Jon S…               62             2011            2019    204275         553
+## 3 Daene…               62             2011            2019    162374         434
+## 4 Cerse…               62             2011            2019     77016         247
+## 5 Sansa…               59             2011            2019    107834         317
+## 6 Arya …               59             2011            2019    151797         433
+## # … with 12 more variables: Total.Chapters &lt;int&gt;, Total.Pages..GOT. &lt;int&gt;,
+## #   Total.Chapters..GOT. &lt;int&gt;, Total.Pages..COK. &lt;int&gt;,
+## #   Total.Chapters..COK. &lt;int&gt;, Total.Pages..SOS. &lt;int&gt;,
+## #   Total.Chapters..SOS. &lt;int&gt;, Total.Pages..FFC. &lt;int&gt;,
+## #   Total.Chapters..FFC. &lt;int&gt;, Total.Pages..DWD. &lt;int&gt;,
+## #   Total.Chapters..DWD. &lt;int&gt;, screentime &lt;dbl&gt;</code></pre>
+<pre class="r"><code>#Which non POV characters from the books had the most screentime in the show? 
+got7_nonpov &lt;- got7 %&gt;% filter(is.na(WordCount)) %&gt;% arrange(desc(screentime))
+got7_nonpov &lt;- subset(got7_nonpov, Name!=&quot;Daenerys Targaryen&quot; &amp; Name!=&quot;Eddard &#39;Ned&#39; Stark&quot;)
+head(got7_nonpov)</code></pre>
+<pre><code>##                           Name      actor_ess episodes_appeared
+## 2                Jorah Mormont      Iain Glen                52
+## 3 Petyr &#39;Littlefinger&#39; Baelish   Aidan Gillen                41
+## 5                   Lord Varys   Conleth Hill                46
+## 6              Tywin Lannister  Charles Dance                27
+## 7              Margaery Tyrell Natalie Dormer                26
+##   first_appearance last_appearance WordCount Total.Pages Total.Chapters
+## 2             2011            2019        NA          NA             NA
+## 3             2011            2017        NA          NA             NA
+## 5             2011            2019        NA          NA             NA
+## 6             2011            2015        NA          NA             NA
+## 7             2012            2016        NA          NA             NA
+##   Total.Pages..GOT. Total.Chapters..GOT. Total.Pages..COK. Total.Chapters..COK.
+## 2                NA                   NA                NA                   NA
+## 3                NA                   NA                NA                   NA
+## 5                NA                   NA                NA                   NA
+## 6                NA                   NA                NA                   NA
+## 7                NA                   NA                NA                   NA
+##   Total.Pages..SOS. Total.Chapters..SOS. Total.Pages..FFC. Total.Chapters..FFC.
+## 2                NA                   NA                NA                   NA
+## 3                NA                   NA                NA                   NA
+## 5                NA                   NA                NA                   NA
+## 6                NA                   NA                NA                   NA
+## 7                NA                   NA                NA                   NA
+##   Total.Pages..DWD. Total.Chapters..DWD. screentime episodes
+## 2                NA                   NA     117.30       42
+## 3                NA                   NA     102.15       35
+## 5                NA                   NA      81.45       36
+## 6                NA                   NA      78.15       27
+## 7                NA                   NA      78.00       26
+##  [ reached &#39;max&#39; / getOption(&quot;max.print&quot;) -- omitted 1 rows ]</code></pre>
+<pre class="r"><code>#Summary Statistics
+
+#Screentime statistics for POV characters 
+
+sum_screentime &lt;- got7 %&gt;% na.omit() %&gt;% summarize(mean_screentime=mean(screentime), sd_screentime=sd(screentime), min_screentime=min(screentime), max_screentime=max(screentime))
+print(sum_screentime)</code></pre>
+<pre><code>##   mean_screentime sd_screentime min_screentime max_screentime
+## 1        128.8333      88.78791           3.45          293.3</code></pre>
+<pre class="r"><code>#Wordcount statistics for POV characters
+
+sum_wordcount &lt;- got7 %&gt;% na.omit() %&gt;% summarize(mean_wordcount=mean(WordCount), sd_wordcount=sd(WordCount), min_wordcount=min(WordCount), max_wordcount=max(WordCount))
+print(sum_wordcount)</code></pre>
+<pre><code>##   mean_wordcount sd_wordcount min_wordcount max_wordcount
+## 1       84140.13     68100.16          5701        233876</code></pre>
+<pre class="r"><code>#Adding WordCount to Screentime ratio for POV characters
+got7_pov &lt;- got7_pov %&gt;% mutate(screenword_ratio = WordCount/screentime)
+
+#Adding WordCount per Chapter ratio for POV characters
+got7_pov &lt;- got7_pov %&gt;% mutate(wordchapter_ratio = WordCount/Total.Chapters)</code></pre>
+</div>
+<div id="data-visualization" class="section level2">
+<h2>Data Visualization</h2>
+<p>After generating summary statistics for all the variables applied to POV and non-POV characters, I’ve created some graphical displays to visually demonstrate and compare the data.
+In the plot below I compared the POV characters to see who had the highest values for both word count and screentime. The points that are significantly above the regression line represent characters who played a greater role in the show than the books, and the points below the line represent characters who played a greater role in the books. Following the trend from previous analysis, characters like Tyrion Lannister, Jon Snow, and Daenerys were the most impactful in both mediums of the story. Characters like Cersei Lannister and Sansa had a greater show presence while Catelyn and Bran had a greater book presence.</p>
+<p>It is peculiar that of all the characters who survive to the last episode of the TV series, Bran Stark was the one with the lowest amount of screentime.</p>
+<pre class="r"><code>library(ggplot2)
+library(ggrepel)
+
+charplot1 &lt;- ggplot(got7_pov, aes(x=WordCount,y=screentime, label=Name)) + geom_point(shape = 9,color=&quot;firebrick&quot;) + geom_smooth(method=lm, color=&quot;grey20&quot;) + geom_text_repel(aes(label = Name),box.padding   = .95, point.padding = 0.9,segment.color = &#39;grey50&#39;)
+
+charplot1</code></pre>
+<p><img src="/project/project1_files/figure-html/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>I made a correlation heatmap to show which of the numeric variables had a high correlation with each other. Most of the statistics correlate very highly, which is expected as a greater amount of time on screen is usually associated with more dialogue/speaking lines and importance to the story. I was surprised to see that there’s a lower correlation between the number of episodes a show character appears in and their wordcount in the books. This demonstrates that there is a difference between how important the character might be in the show vs. the books.</p>
+<pre class="r"><code>#Correlation Heatmap 
+
+got_mat &lt;- got7 %&gt;% dplyr::select(episodes_appeared, WordCount, Total.Pages, Total.Chapters, screentime, episodes)
+
+got_cormat &lt;- got_mat %&gt;% select_if(is.numeric) %&gt;% cor(use=&quot;pair&quot;)
+
+got_tidycor &lt;- got_cormat %&gt;% as.data.frame %&gt;% rownames_to_column(&quot;var1&quot;) %&gt;%  pivot_longer(-1,names_to=&quot;var2&quot;,values_to=&quot;correlation&quot;)
+
+got_tidycor</code></pre>
+<pre><code>## # A tibble: 25 x 3
+##    var1              var2              correlation
+##    &lt;chr&gt;             &lt;chr&gt;                   &lt;dbl&gt;
+##  1 episodes_appeared episodes_appeared       1    
+##  2 episodes_appeared WordCount               0.738
+##  3 episodes_appeared Total.Pages             0.851
+##  4 episodes_appeared Total.Chapters          0.807
+##  5 episodes_appeared screentime              0.894
+##  6 WordCount         episodes_appeared       0.738
+##  7 WordCount         WordCount               1    
+##  8 WordCount         Total.Pages             0.998
+##  9 WordCount         Total.Chapters          0.991
+## 10 WordCount         screentime              0.885
+## # … with 15 more rows</code></pre>
+<pre class="r"><code>got_tidycor%&gt;%ggplot(aes(var1,var2,fill=correlation))+  geom_tile()+  scale_fill_gradient2(low=&quot;red&quot;,mid=&quot;white&quot;,high=&quot;blue&quot;)+   geom_text(aes(label=round(correlation,2)),color = &quot;black&quot;, size = 4)+   theme(axis.text.x = element_text(angle = 90, hjust=1))+ coord_fixed()</code></pre>
+<p><img src="/project/project1_files/figure-html/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="other-plots" class="section level2">
+<h2>Other Plots</h2>
+<p>In my first plot I showed a relationship between episode appearances and screentime, as well as demonstrating with the color aesthetic that there are some non POV characters (grey dots) that have more screen time than book POV characters (green dots).</p>
+<pre class="r"><code>library(ggplot2)
+
+ggplot(got7B, aes(x=`episodes_appeared`, y=screentime)) + geom_point(aes(color=WordCount)) + geom_smooth(method=&quot;lm&quot;) +scale_color_gradient(low=&quot;darkolivegreen2&quot;, high=&quot;red&quot;) + geom_text_repel(aes(label = Name))</code></pre>
+<p><img src="/project/project1_files/figure-html/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>#geom_text_repel(aes(label = Name),box.padding   = 0.9, point.padding = 0.9,segment.color = #&#39;grey50&#39;)
+
+got7_pov2 &lt;- got7_pov %&gt;% filter(WordCount &gt; 1)</code></pre>
+</div>
+<div id="k-means-clustering" class="section level2">
+<h2>K Means Clustering</h2>
+<pre class="r"><code>got_mat1 &lt;- got_mat %&gt;% na.omit() %&gt;% mutate_if(is.numeric,scale) 
+dist(got_mat1,method = &quot;euclidean&quot;)</code></pre>
+<pre><code>##             1         2         4         5         6         7         9
+## 2    4.574011                                                            
+## 4    5.070861  4.477387                                                  
+## 5    7.705864  5.104968  3.125584                                        
+## 6    7.365881  5.417852  2.491295  1.096137                              
+## 7   11.638975  9.032705  6.702387  4.060613  4.307177                    
+## 9   17.714805 15.054043 12.698347 10.162805 10.368470  6.118604          
+## 10  15.704583 13.054562 10.705332  8.145741  8.352728  4.102480  2.035820
+##            10        12        13        15        24        30       111
+## 2                                                                        
+## 4                                                                        
+## 5                                                                        
+## 6                                                                        
+## 7                                                                        
+## 9                                                                        
+## 10                                                                       
+##  [ reached getOption(&quot;max.print&quot;) -- omitted 7 rows ]</code></pre>
+<pre class="r"><code>kmeans1 &lt;- got_mat1 %&gt;% kmeans(3)
+
+kmeansclust &lt;- got_mat1 %&gt;% mutate(cluster=as.factor(kmeans1$cluster))
+
+kmeansclust %&gt;% ggplot(aes(screentime,WordCount, color=cluster)) + geom_point()</code></pre>
+<p><img src="/project/project1_files/figure-html/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>…</p>
+</div>
+
+            
+        <hr>         <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div> 
+            </div>
+          </div>
+
+   <hr>  <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div> 
+        </div>
+      </div>
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="/js/docs.min.js"></script>
+<script src="/js/main.js"></script>
+
+<script src="/js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>

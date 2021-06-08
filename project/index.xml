@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Projects on Akshat Patni</title>
+    <link>/project/</link>
+    <description>Recent content in Projects on Akshat Patni</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language><atom:link href="/project/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Exploratory Data Analysis: Game of Thrones Characters</title>
+      <link>/project/project1/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project1/</guid>
+      <description>Introduction In this study, I’ve applied some basic data manipulation and statistical methods to one of my favorite works of fiction, the Game of Thrones series by George R.R. Martin! In particular, I wanted to differentiate between the influence of characters between the books compared to the show, seeing as how the two stories have greatly diverged. I also wanted to see which characters were the most influential overall.</description>
+    </item>
+    
+  </channel>
+</rss>
