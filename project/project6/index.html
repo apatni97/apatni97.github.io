@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Akshat Patni" />
+    
+    <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico">
+    <title>Project Source Code</title>
+    <meta name="generator" content="Hugo 0.83.1" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="/css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="/post/">BLOG</a></li>
+        
+        <li><a href="/projects/">PROJECTS</a></li>
+        
+        <li><a href="/resume/">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="/project/project6/">Project Source Code</a></strong>
+          </h3>
+        </div>
+ 
+<div class="blog-title">
+          <h4>
+         January 1, 0001 
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+<script src="/rmarkdown-libs/header-attrs/header-attrs.js"></script>
+
+
+<div id="kmeans.cpp-source-code" class="section level2">
+<h2>Kmeans.cpp Source Code</h2>
+<p>This program includes both the sequential and parallel implementations of the k-means algorithm. Added command line flags allow the user to either generate random points to be clustered, or use an points.txt file with a formatted list of points and output a clusters.txt file with the list of cluster centroids.</p>
+<pre class="rcpp"><code>#include &lt;iostream&gt;
+#include &lt;sstream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;random&gt;
+#include &lt;algorithm&gt;
+#include &lt;iterator&gt;
+#include &lt;chrono&gt;
+
+// struct point
+
+struct point {
+  double x, y;
+
+  double sqr_dist(const point&amp; p) const {
+    double dx = p.x - x;
+    double dy = p.y - y;
+    return dx * dx + dy * dy;
+  }
+};
+
+static std::istream&amp; operator&gt;&gt;(std::istream&amp; in, point&amp; p) {
+  in &gt;&gt; p.x &gt;&gt; p.y;
+  return in;
+}
+
+static std::ostream&amp; operator&lt;&lt;(std::ostream&amp; out, const point&amp; p) {
+  out &lt;&lt; p.x &lt;&lt; &quot; &quot; &lt;&lt; p.y;
+  return out;
+}
+
+// struct cluster
+
+struct cluster {
+  double x, y;
+  int n;
+
+  bool save_as(point&amp; p) const {
+    double nx = x / n;
+    double ny = y / n;
+    if (nx == p.x &amp;&amp; ny == p.y) return false;
+    p.x = nx;
+    p.y = ny;
+    return true;
+  }
+
+  void reset() {
+    x = y = 0.0;
+    n = 0;
+  }
+
+  cluster&amp; operator+=(const point&amp; p) {
+    x += p.x;
+    y += p.y;
+    n++;
+    return *this;
+  }
+
+  cluster&amp; operator+=(const cluster&amp; c) {
+    x += c.x;
+    y += c.y;
+    n += c.n;
+    return *this;
+  }
+};
+
+// k-means functions
+
+static void find_closest(const point&amp; p, const std::vector&lt;point&gt;&amp; centers, std::vector&lt;cluster&gt;&amp; clusters) {
+  double min_d = std::numeric_limits&lt;double&gt;::infinity();
+  size_t min_ci;
+  for (size_t ci = 0; ci &lt; centers.size(); ci++) {
+    double d = centers[ci].sqr_dist(p);
+    if (d &lt; min_d) {
+      min_d = d;
+      min_ci = ci;
+    }
+  }
+
+  clusters[min_ci] += p;
+}
+
+#if defined(_OPENMP)
+
+static void find_closest(const std::vector&lt;point&gt;&amp; points, const std::vector&lt;point&gt;&amp; centers, std::vector&lt;cluster&gt;&amp; clusters) {
+  #pragma omp parallel
+  {
+    std::vector&lt;cluster&gt; local_clusters {clusters.size()};
+
+    #pragma omp for
+    for (size_t pi = 0; pi &lt; points.size(); pi++) {
+      find_closest(points[pi], centers, local_clusters);
+    }
+
+    #pragma omp critical
+    for (size_t ci = 0; ci &lt; clusters.size(); ci++) {
+      clusters[ci] += local_clusters[ci];
+    }
+  }
+}
+
+#else // not defined(_OPENMP)
+
+static void find_closest(const std::vector&lt;point&gt;&amp; points, const std::vector&lt;point&gt;&amp; centers, std::vector&lt;cluster&gt;&amp; clusters) {
+  for (size_t pi = 0; pi &lt; points.size(); pi++) {
+    find_closest(points[pi], centers, clusters);
+  }
+}
+
+#endif // defined(_OPENMP)
+
+static bool update_centers(std::vector&lt;point&gt;&amp; centers, std::vector&lt;cluster&gt;&amp; clusters) {
+  bool mod = false;
+  for (size_t ci = 0; ci &lt; centers.size(); ci++) {
+    if (clusters[ci].save_as(centers[ci])) mod = true;
+    clusters[ci].reset();
+  }
+  return mod;
+}
+
+// initialization functions
+
+static size_t parse_count(const char* s, size_t min, size_t max, const char* msg) {
+  std::istringstream ss(s);
+  size_t n;
+  if (! (ss &gt;&gt; n) || ! ss.eof() || n &lt; min || n &gt; max) {
+    std::cerr &lt;&lt; msg &lt;&lt; &quot;: &quot; &lt;&lt; s &lt;&lt; &quot;\n&quot;;
+    return 0;
+  }
+  return n;
+}
+
+static bool init_stdin(std::vector&lt;point&gt;&amp; points, std::vector&lt;point&gt;&amp; centers, char** argv) {
+  // read points from stdin
+  std::copy(std::istream_iterator&lt;point&gt;(std::cin), std::istream_iterator&lt;point&gt;(), std::back_inserter(points));
+
+  size_t cc = parse_count(argv[1], 2, points.size(), &quot;Invalid cluster count&quot;);
+  if (!cc) return false;
+  centers.resize(cc);
+
+  // pick n random points as initial centers
+  std::shuffle(points.begin(), points.end(), std::default_random_engine{});
+  std::copy_n(points.begin(), centers.size(), centers.begin());
+
+  return true;
+}
+
+static bool init_random(std::vector&lt;point&gt;&amp; points, std::vector&lt;point&gt;&amp; centers, char** argv) {
+  size_t pc = parse_count(argv[2], 2, 1&#39;000&#39;000&#39;000, &quot;Invalid point count&quot;);
+  if (!pc) return false;
+
+  size_t cc = parse_count(argv[1], 2, pc, &quot;Invalid cluster count&quot;);
+  if (!cc) return false;
+
+  points.resize(pc);
+  centers.resize(cc);
+
+  std::default_random_engine rnd {std::random_device{}()};
+  std::uniform_real_distribution&lt;double&gt; dist {-10.0, 10.0};
+  auto rnd_point = [&amp;](){ return point { dist(rnd), dist(rnd) }; };
+
+  // pick random points and initial centers
+  std::generate(points.begin(), points.end(), rnd_point);
+  std::generate(centers.begin(), centers.end(), rnd_point);
+
+  return true;
+}
+
+static void usage(char** argv) {
+  std::cerr &lt;&lt; &quot;Usage:\n&quot;;
+  std::cerr &lt;&lt; argv[0] &lt;&lt; &quot; &lt;cluster count&gt;\n    read points from stdin\n&quot;;
+  std::cerr &lt;&lt; argv[0] &lt;&lt; &quot; &lt;cluster count&gt; &lt;point count&gt;\n    generate random points\n&quot;;
+}
+
+// main function
+
+int main(int argc, char** argv) {
+
+  std::vector&lt;point&gt; points;
+  std::vector&lt;point&gt; centers;
+  if (argc == 2) {
+    if (! init_stdin(points, centers, argv)) return EXIT_FAILURE;
+  }
+  else if (argc == 3) {
+    if (! init_random(points, centers, argv)) return EXIT_FAILURE;
+  }
+  else {
+    usage(argv);
+    return EXIT_FAILURE;
+  }
+
+  std::vector&lt;cluster&gt; clusters {centers.size()};
+
+  auto t0 = std::chrono::steady_clock::now();
+
+  const int max_iter = 30;
+  bool mod = true;
+  for (int i = 0; mod &amp;&amp; i &lt; max_iter; i++) {
+    std::cerr &lt;&lt; &quot;Iteration: &quot; &lt;&lt; i &lt;&lt; &quot;\n&quot;;
+    find_closest(points, centers, clusters);
+    mod = update_centers(centers, clusters);
+  }
+
+  auto t1 = std::chrono::steady_clock::now();
+  auto d = std::chrono::duration_cast&lt;std::chrono::duration&lt;double&gt;&gt;(t1 - t0);
+  std::cerr &lt;&lt; &quot;Time: &quot; &lt;&lt; d.count() &lt;&lt; &quot; seconds\n&quot;;
+
+  // write centers to stdout
+  std::copy(centers.begin(), centers.end(), std::ostream_iterator&lt;point&gt;(std::cout, &quot;\n&quot;));
+}
+</code></pre>
+</div>
+<div id="makefile" class="section level2">
+<h2>Makefile</h2>
+<pre class="rcpp"><code>CXXFLAGS := -Wall -Wextra -Wpedantic -O3
+
+CXX := g++-10
+# CXX := clang++
+# CXXFLAGS += -mlinker-version=0 -L/usr/local/Cellar/llvm/11.1.0_1/lib
+
+SEQ := kmeans_sequential
+PAR := kmeans_parallel
+
+$(PAR): CXXFLAGS += -fopenmp
+
+all: $(SEQ) $(PAR)
+
+$(SEQ).cpp $(PAR).cpp: kmeans.cpp
+    ln -s $&lt; $@
+
+init: $(SEQ).cpp $(PAR).cpp
+
+$(SEQ): $(SEQ).cpp
+$(PAR): $(PAR).cpp
+
+run_$(SEQ)_file: $(SEQ)
+    ./$(SEQ) 3 &lt; points.txt | tee clusters.txt
+
+run_$(SEQ)_random: $(SEQ)
+    ./$(SEQ) 20 20000000
+
+valgrind_$(SEQ)_file: $(SEQ)
+    valgrind ./$(SEQ) 3 &lt; points.txt
+
+valgrind_$(SEQ)_random: $(SEQ)
+    valgrind ./$(SEQ) 20 1000000
+
+run_$(PAR)_file: $(PAR)
+    OMP_NUM_THREADS=4 ./$(PAR) 3 &lt; points.txt | tee clusters.txt
+
+run_$(PAR)_random: $(PAR)
+    OMP_NUM_THREADS=4 ./$(PAR) 20 20000000
+
+valgrind_$(PAR)_file: $(PAR)
+    OMP_NUM_THREADS=4 valgrind --suppressions=$(PAR).supp ./$(PAR) 3 &lt; points.txt
+
+valgrind_$(PAR)_random: $(PAR)
+    OMP_NUM_THREADS=4 valgrind --suppressions=$(PAR).supp ./$(PAR) 20 1000000
+
+zip:
+    $(RM) *.zip
+    zip kmeans.zip kmeans.cpp Makefile points.txt clusters.txt
+
+clean:
+    $(RM) *.zip $(SEQ) $(PAR) $(SEQ).cpp $(PAR).cpp</code></pre>
+</div>
+<div id="example-points.txt-format" class="section level2">
+<h2>Example points.txt format</h2>
+<pre class="rcpp"><code>9 9
+1 1
+-1 -1
+3 3
+10 10
+-2 -2
+7 8
+0.2 0
+-1 0
+6 10</code></pre>
+</div>
+
+            
+        <hr>         <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div> 
+            </div>
+          </div>
+
+   <hr>  <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div> 
+        </div>
+      </div>
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="/js/docs.min.js"></script>
+<script src="/js/main.js"></script>
+
+<script src="/js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>

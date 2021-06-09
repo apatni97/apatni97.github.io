@@ -1,0 +1,10 @@
+---
+title: "OpenMP Parallel K-Means Research Paper"
+output: html_document
+hidedate: true
+hiderelated: true
+hidediscus: true
+---
+
+<body><div align="center"><iframe width="800" height="1000" src="/Users/AkshatPatni/Desktop/website/static/OMP_paper2.pdf" frameborder="1px"></iframe></div></body>
+

@@ -1,0 +1,297 @@
+---
+title: "Project Source Code"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Kmeans.cpp Source Code
+
+This program includes both the sequential and parallel implementations of the k-means algorithm. Added command line flags allow the user to either generate random points to be clustered, or use an points.txt file with a formatted list of points and output a clusters.txt file with the list of cluster centroids.
+
+```{rcpp eval=FALSE}
+#include <iostream>
+#include <sstream>
+#include <vector>
+#include <string>
+#include <random>
+#include <algorithm>
+#include <iterator>
+#include <chrono>
+
+// struct point
+
+struct point {
+  double x, y;
+
+  double sqr_dist(const point& p) const {
+    double dx = p.x - x;
+    double dy = p.y - y;
+    return dx * dx + dy * dy;
+  }
+};
+
+static std::istream& operator>>(std::istream& in, point& p) {
+  in >> p.x >> p.y;
+  return in;
+}
+
+static std::ostream& operator<<(std::ostream& out, const point& p) {
+  out << p.x << " " << p.y;
+  return out;
+}
+
+// struct cluster
+
+struct cluster {
+  double x, y;
+  int n;
+
+  bool save_as(point& p) const {
+    double nx = x / n;
+    double ny = y / n;
+    if (nx == p.x && ny == p.y) return false;
+    p.x = nx;
+    p.y = ny;
+    return true;
+  }
+
+  void reset() {
+    x = y = 0.0;
+    n = 0;
+  }
+
+  cluster& operator+=(const point& p) {
+    x += p.x;
+    y += p.y;
+    n++;
+    return *this;
+  }
+
+  cluster& operator+=(const cluster& c) {
+    x += c.x;
+    y += c.y;
+    n += c.n;
+    return *this;
+  }
+};
+
+// k-means functions
+
+static void find_closest(const point& p, const std::vector<point>& centers, std::vector<cluster>& clusters) {
+  double min_d = std::numeric_limits<double>::infinity();
+  size_t min_ci;
+  for (size_t ci = 0; ci < centers.size(); ci++) {
+    double d = centers[ci].sqr_dist(p);
+    if (d < min_d) {
+      min_d = d;
+      min_ci = ci;
+    }
+  }
+
+  clusters[min_ci] += p;
+}
+
+#if defined(_OPENMP)
+
+static void find_closest(const std::vector<point>& points, const std::vector<point>& centers, std::vector<cluster>& clusters) {
+  #pragma omp parallel
+  {
+    std::vector<cluster> local_clusters {clusters.size()};
+
+    #pragma omp for
+    for (size_t pi = 0; pi < points.size(); pi++) {
+      find_closest(points[pi], centers, local_clusters);
+    }
+
+    #pragma omp critical
+    for (size_t ci = 0; ci < clusters.size(); ci++) {
+      clusters[ci] += local_clusters[ci];
+    }
+  }
+}
+
+#else // not defined(_OPENMP)
+
+static void find_closest(const std::vector<point>& points, const std::vector<point>& centers, std::vector<cluster>& clusters) {
+  for (size_t pi = 0; pi < points.size(); pi++) {
+    find_closest(points[pi], centers, clusters);
+  }
+}
+
+#endif // defined(_OPENMP)
+
+static bool update_centers(std::vector<point>& centers, std::vector<cluster>& clusters) {
+  bool mod = false;
+  for (size_t ci = 0; ci < centers.size(); ci++) {
+    if (clusters[ci].save_as(centers[ci])) mod = true;
+    clusters[ci].reset();
+  }
+  return mod;
+}
+
+// initialization functions
+
+static size_t parse_count(const char* s, size_t min, size_t max, const char* msg) {
+  std::istringstream ss(s);
+  size_t n;
+  if (! (ss >> n) || ! ss.eof() || n < min || n > max) {
+    std::cerr << msg << ": " << s << "\n";
+    return 0;
+  }
+  return n;
+}
+
+static bool init_stdin(std::vector<point>& points, std::vector<point>& centers, char** argv) {
+  // read points from stdin
+  std::copy(std::istream_iterator<point>(std::cin), std::istream_iterator<point>(), std::back_inserter(points));
+
+  size_t cc = parse_count(argv[1], 2, points.size(), "Invalid cluster count");
+  if (!cc) return false;
+  centers.resize(cc);
+
+  // pick n random points as initial centers
+  std::shuffle(points.begin(), points.end(), std::default_random_engine{});
+  std::copy_n(points.begin(), centers.size(), centers.begin());
+
+  return true;
+}
+
+static bool init_random(std::vector<point>& points, std::vector<point>& centers, char** argv) {
+  size_t pc = parse_count(argv[2], 2, 1'000'000'000, "Invalid point count");
+  if (!pc) return false;
+
+  size_t cc = parse_count(argv[1], 2, pc, "Invalid cluster count");
+  if (!cc) return false;
+
+  points.resize(pc);
+  centers.resize(cc);
+
+  std::default_random_engine rnd {std::random_device{}()};
+  std::uniform_real_distribution<double> dist {-10.0, 10.0};
+  auto rnd_point = [&](){ return point { dist(rnd), dist(rnd) }; };
+
+  // pick random points and initial centers
+  std::generate(points.begin(), points.end(), rnd_point);
+  std::generate(centers.begin(), centers.end(), rnd_point);
+
+  return true;
+}
+
+static void usage(char** argv) {
+  std::cerr << "Usage:\n";
+  std::cerr << argv[0] << " <cluster count>\n    read points from stdin\n";
+  std::cerr << argv[0] << " <cluster count> <point count>\n    generate random points\n";
+}
+
+// main function
+
+int main(int argc, char** argv) {
+
+  std::vector<point> points;
+  std::vector<point> centers;
+  if (argc == 2) {
+    if (! init_stdin(points, centers, argv)) return EXIT_FAILURE;
+  }
+  else if (argc == 3) {
+    if (! init_random(points, centers, argv)) return EXIT_FAILURE;
+  }
+  else {
+    usage(argv);
+    return EXIT_FAILURE;
+  }
+
+  std::vector<cluster> clusters {centers.size()};
+
+  auto t0 = std::chrono::steady_clock::now();
+
+  const int max_iter = 30;
+  bool mod = true;
+  for (int i = 0; mod && i < max_iter; i++) {
+    std::cerr << "Iteration: " << i << "\n";
+    find_closest(points, centers, clusters);
+    mod = update_centers(centers, clusters);
+  }
+
+  auto t1 = std::chrono::steady_clock::now();
+  auto d = std::chrono::duration_cast<std::chrono::duration<double>>(t1 - t0);
+  std::cerr << "Time: " << d.count() << " seconds\n";
+
+  // write centers to stdout
+  std::copy(centers.begin(), centers.end(), std::ostream_iterator<point>(std::cout, "\n"));
+}
+
+```
+
+## Makefile
+
+```{rcpp eval=FALSE}
+CXXFLAGS := -Wall -Wextra -Wpedantic -O3
+
+CXX := g++-10
+# CXX := clang++
+# CXXFLAGS += -mlinker-version=0 -L/usr/local/Cellar/llvm/11.1.0_1/lib
+
+SEQ := kmeans_sequential
+PAR := kmeans_parallel
+
+$(PAR): CXXFLAGS += -fopenmp
+
+all: $(SEQ) $(PAR)
+
+$(SEQ).cpp $(PAR).cpp: kmeans.cpp
+	ln -s $< $@
+
+init: $(SEQ).cpp $(PAR).cpp
+
+$(SEQ): $(SEQ).cpp
+$(PAR): $(PAR).cpp
+
+run_$(SEQ)_file: $(SEQ)
+	./$(SEQ) 3 < points.txt | tee clusters.txt
+
+run_$(SEQ)_random: $(SEQ)
+	./$(SEQ) 20 20000000
+
+valgrind_$(SEQ)_file: $(SEQ)
+	valgrind ./$(SEQ) 3 < points.txt
+
+valgrind_$(SEQ)_random: $(SEQ)
+	valgrind ./$(SEQ) 20 1000000
+
+run_$(PAR)_file: $(PAR)
+	OMP_NUM_THREADS=4 ./$(PAR) 3 < points.txt | tee clusters.txt
+
+run_$(PAR)_random: $(PAR)
+	OMP_NUM_THREADS=4 ./$(PAR) 20 20000000
+
+valgrind_$(PAR)_file: $(PAR)
+	OMP_NUM_THREADS=4 valgrind --suppressions=$(PAR).supp ./$(PAR) 3 < points.txt
+
+valgrind_$(PAR)_random: $(PAR)
+	OMP_NUM_THREADS=4 valgrind --suppressions=$(PAR).supp ./$(PAR) 20 1000000
+
+zip:
+	$(RM) *.zip
+	zip kmeans.zip kmeans.cpp Makefile points.txt clusters.txt
+
+clean:
+	$(RM) *.zip $(SEQ) $(PAR) $(SEQ).cpp $(PAR).cpp
+```
+
+## Example points.txt format
+
+```{rcpp eval=FALSE}
+9 9
+1 1
+-1 -1
+3 3
+10 10
+-2 -2
+7 8
+0.2 0
+-1 0
+6 10
+```

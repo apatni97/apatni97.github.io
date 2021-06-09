@@ -1,14 +1,18 @@
 ---
-title: "Include external html file"
+title: "Parallel Programming: K-Means Clustering"
 output: html_document
+hidedate: true
+hiderelated: true
+hidediscus: true
 ---
 
-```{r generate-external-report, include=FALSE}
-rmarkdown::render('project3.Rmd')
-```
 
-External `HTML` file can be included in an `<iframe>` element:
+<i class="fas fa-book"></i> &nbsp; [Research Paper](/project/project5/)
 
-```{r, echo=FALSE}
-htmltools::tags$iframe(title = "My embedded document", src = "project3.html")
-```
+<i class="fas fa-code-branch"></i> &nbsp; [Project Source Code](/project/project6/)
+
+
+<!--
+<i class="fa fa-pie-chart"></i> 
+<i class="fa fa-tasks"></i> 
+-->
