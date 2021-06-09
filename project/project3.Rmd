@@ -1,13 +1,10 @@
 ---
-title: "PEG Fusion Paper"
+title: "PEG Fusion Research Paper"
 output: html_document
+hidedate: true
+hiderelated: true
+hidediscus: true
 ---
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
-```{r, echo=FALSE}
-knitr::include_url("https://github.com/apatni97/project_source/blob/03b65fc8be1a725fb20b574d5eed8d53c929d9a5/neuro_paper1.pdf", height = "800px")
-```
-
+<body><div align="center"><iframe width="800" height="1000" src="/neuro_paper2.pdf" frameborder="1px"></iframe></div></body>
 

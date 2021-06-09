@@ -1,0 +1,14 @@
+---
+title: "Include external html file"
+output: html_document
+---
+
+```{r generate-external-report, include=FALSE}
+rmarkdown::render('project3.Rmd')
+```
+
+External `HTML` file can be included in an `<iframe>` element:
+
+```{r, echo=FALSE}
+htmltools::tags$iframe(title = "My embedded document", src = "project3.html")
+```
