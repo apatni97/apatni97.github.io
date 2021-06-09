@@ -10,7 +10,9 @@ Check out some of my coding projects below:
 
 <i class="fa fa-stethoscope"></i> &nbsp; [Neuroscience: Using PEG Fusion to advance Nerve Repair](/project/project3/)
 
-<i class="fa fa-pie-chart"></i> &nbsp; [Parallel Programming: K-Means Clustering](/project/project2/)
+<i class="fas fa-book"></i> &nbsp; [Parallel Programming: K-Means Clustering Research Paper](/project/project5/)
+
+<i class="fas fa-code-branch"></i> &nbsp; [Parallel Programming: K-Means Clustering Source Code](/project/project5/)
 
 <i class="fa fa-signal"></i> &nbsp; [Wrangling & Exploratory Data Analysis](/project/project1/)
 
