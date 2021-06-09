@@ -72,7 +72,8 @@ summary(cars) ## speed dist ## Min. : 4.0 Min. : 2.00 ## 1st Qu.:12.0 1st Qu.: 2
       <guid>/projects/</guid>
       <description>  Check out some of my coding projects below:
  Neuroscience: Using PEG Fusion to advance Nerve Repair
- Parallel Programming: K-Means Clustering
+ Parallel Programming: K-Means Clustering Research Paper
+ Parallel Programming: K-Means Clustering Source Code
  Wrangling &amp;amp; Exploratory Data Analysis
  Modeling, Inference, Prediction
   -- </description>
