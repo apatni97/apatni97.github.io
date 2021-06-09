@@ -28,6 +28,15 @@ summary(cars) ## speed dist ## Min. : 4.0 Min. : 2.00 ## 1st Qu.:12.0 1st Qu.: 2
     </item>
     
     <item>
+      <title>Include external html file</title>
+      <link>/project/project4/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project4/</guid>
+      <description>External HTML file can be included in an &amp;lt;iframe&amp;gt; element:</description>
+    </item>
+    
+    <item>
       <title>Modeling, Testing, and Predicting: Diabetes Indicators amongst Pima Indian Females</title>
       <link>/project/project2/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -43,8 +52,10 @@ summary(cars) ## speed dist ## Min. : 4.0 Min. : 2.00 ## 1st Qu.:12.0 1st Qu.: 2
       
       <guid>/projects/</guid>
       <description>  Check out some of my coding projects below:
+ Neuroscience: Using PEG Fusion to advance Nerve Repair
  Wrangling &amp;amp; Exploratory Data Analysis
  Modeling, Inference, Prediction
+ Parallel Programming: K-Means Clustering
   -- </description>
     </item>
     

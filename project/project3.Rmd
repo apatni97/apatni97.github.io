@@ -1,0 +1,13 @@
+---
+title: "PEG Fusion Paper"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=FALSE}
+knitr::include_url("https://github.com/apatni97/project_source/blob/03b65fc8be1a725fb20b574d5eed8d53c929d9a5/neuro_paper1.pdf", height = "800px")
+```
+
+

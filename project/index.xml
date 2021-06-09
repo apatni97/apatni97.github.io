@@ -16,6 +16,15 @@
     </item>
     
     <item>
+      <title>Include external html file</title>
+      <link>/project/project4/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project4/</guid>
+      <description>External HTML file can be included in an &amp;lt;iframe&amp;gt; element:</description>
+    </item>
+    
+    <item>
       <title>Modeling, Testing, and Predicting: Diabetes Indicators amongst Pima Indian Females</title>
       <link>/project/project2/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>

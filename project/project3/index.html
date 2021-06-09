@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Akshat Patni" />
+    
+    <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico">
+    <title>HW 2</title>
+    <meta name="generator" content="Hugo 0.83.1" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="/css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="/post/">BLOG</a></li>
+        
+        <li><a href="/projects/">PROJECTS</a></li>
+        
+        <li><a href="/resume/">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="/project/project3/">HW 2</a></strong>
+          </h3>
+        </div>
+ 
+<div class="blog-title">
+          <h4>
+         January 1, 0001 
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+<script src="/rmarkdown-libs/header-attrs/header-attrs.js"></script>
+
+
+<div id="akshat-patni-ap46883" class="section level2">
+<h2>Akshat Patni ap46883</h2>
+<p><strong>This homework is due on February 7, 2021 at 11:59pm. Please submit as an HTML file on Canvas.</strong></p>
+<p><em>For all questions, include the R commands/functions that you used to find your answer. Answers without supporting code will not receive credit.</em></p>
+<blockquote>
+<h4 id="review-of-how-to-submit-this-assignment">Review of how to submit this assignment</h4>
+<p>All homework assignments will be completed using R Markdown. These <code>.Rmd</code> files consist of &gt;text/syntax (formatted using Markdown) alongside embedded R code.
+When you have completed the assignment (by adding R code inside codeblocks and supporting text outside of the codeblocks), create your document as follows:</p>
+</blockquote>
+<blockquote>
+<ul>
+<li>Click the arrow next to the “Knit” button (above)</li>
+<li>Choose “Knit to HTML”</li>
+<li>Go to Files pane and put checkmark next to the correct HTML file</li>
+<li>Click on the blue gear icon (“More”) and click Export</li>
+<li>Download the file and then upload to Canvas</li>
+</ul>
+</blockquote>
+<hr />
+<div id="question-1-2-pts" class="section level3">
+<h3>Question 1: (2 pts)</h3>
+<div id="the-dataset-chickweight-contains-information-about-the-weights-in-grams-of-chicks-on-different-diets-over-time-at-2-day-intervals." class="section level5">
+<h5>The dataset <code>ChickWeight</code> contains information about the weights (in grams) of chicks on different diets over time (at 2-day intervals).</h5>
+<pre class="r"><code>ChickWeight &lt;- as.data.frame(ChickWeight)
+head(ChickWeight,10)</code></pre>
+<pre><code>##    weight Time Chick Diet
+## 1      42    0     1    1
+## 2      51    2     1    1
+## 3      59    4     1    1
+## 4      64    6     1    1
+## 5      76    8     1    1
+## 6      93   10     1    1
+## 7     106   12     1    1
+## 8     125   14     1    1
+## 9     149   16     1    1
+## 10    171   18     1    1</code></pre>
+</div>
+<div id="how-many-distinct-chicks-are-there-how-many-distinct-time-points-how-many-distinct-diet-conditions-how-many-chicks-per-diet-condition-at-the-start-of-the-experiment-i.e.-at-time-0-for-example-you-could-use-some-combination-of-table-and-length-to-answer-these-questions.-do-not-forget-to-include-the-code-you-used-to-answer-these-questions" class="section level5">
+<h5>How many distinct chicks are there? How many distinct time points? How many distinct diet conditions? How many chicks per diet condition at the start of the experiment (i.e., at Time 0)? For example, you could use some combination of <code>table()</code> and <code>length()</code> to answer these questions. <em>Do not forget to include the code you used to answer these questions!</em></h5>
+<pre class="r"><code>table(ChickWeight$Chick)</code></pre>
+<pre><code>## 
+## 18 16 15 13  9 20 10  8 17 19  4  6 11  3  1 12  2  5 14  7 24 30 22 23 27 28 
+##  2  7  8 12 12 12 12 11 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 
+## 26 25 29 21 33 37 36 31 39 38 32 40 34 35 44 45 43 41 47 49 46 50 42 48 
+## 12 12 12 12 12 12 12 12 12 12 12 12 12 12 10 12 12 12 12 12 12 12 12 12</code></pre>
+<pre class="r"><code>table(ChickWeight$Diet)</code></pre>
+<pre><code>## 
+##   1   2   3   4 
+## 220 120 120 118</code></pre>
+<pre class="r"><code>table(ChickWeight$Time)</code></pre>
+<pre><code>## 
+##  0  2  4  6  8 10 12 14 16 18 20 21 
+## 50 50 49 49 49 49 49 48 47 47 46 45</code></pre>
+<p>There are 50 distinct chicks, 4 distinct diet conditions, and 21 distinct time points. There are 19 chicks for the 1st diet condition,</p>
+<hr />
+</div>
+</div>
+<div id="question-2.1-2-pts" class="section level3">
+<h3>Question 2.1: (2 pts)</h3>
+<div id="using-the-ggplot2-package-create-a-simple-scatterplot-showing-chick-weight-y-axis-as-a-function-of-time.-this-time-relabel-the-axes-more-informatively-and-give-the-plot-a-title." class="section level5">
+<h5>Using the ggplot2 package, create a simple scatterplot showing chick <code>weight</code> (y-axis) as a function of <code>Time</code>. This time, relabel the axes more informatively and give the plot a title.</h5>
+<pre class="r"><code>library(ggplot2)
+ggplot(data = ChickWeight, aes(x = Time, y = ChickWeight$weight)) + geom_point(size=2, alpha = .5) + ggtitle(&quot;Weight vs Time&quot;)</code></pre>
+<p><img src="/project/project3_files/figure-html/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="question-2.2-3-pts" class="section level3">
+<h3>Question 2.2: (3 pts)</h3>
+<div id="building-upon-the-previous-plot-map-chick-to-an-aesthetic-that-assigns-a-color-to-each-chicks-data-points.-add-lines-that-connect-each-chicks-points-together.-finally-remove-the-legend." class="section level5">
+<h5>Building upon the previous plot, map <code>Chick</code> to an aesthetic that assigns a color to each chick’s data points. Add lines that connect each chick’s points together. Finally, remove the legend.</h5>
+<pre class="r"><code>library(ggplot2)
+Time = ChickWeight$Time
+Weight = ChickWeight$weight
+Chick = ChickWeight$Chick
+ggplot(data = ChickWeight, aes(x = Time, y = Weight, color = Chick)) +    geom_point(size = 4, alpha = .5) + geom_line(aes(group=Chick)) + theme(legend.position=&quot;none&quot;)</code></pre>
+<p><img src="/project/project3_files/figure-html/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="question-2.3-2-pts" class="section level3">
+<h3>Question 2.3: (2 pts)</h3>
+<div id="take-the-plot-you-made-in-question-3-and-remove-the-color-from-the-points-only-leave-the-lines-colored-by-chick-but-make-all-of-the-points-white.-put-the-points-on-top-of-the-lines." class="section level5">
+<h5>Take the plot you made in Question 3 and remove the color from the points only (leave the lines colored by chick, but make all of the points white). Put the points <em>on top of</em> the lines.</h5>
+<pre class="r"><code>library(ggplot2)
+Time = ChickWeight$Time
+Weight = ChickWeight$weight
+Chick = ChickWeight$Chick
+ggplot(data = ChickWeight, aes(x = Time, y = Weight, color = Chick)) +    geom_point(size = 4, alpha = .5) + geom_line(aes(group=Chick)) + theme(legend.position=&quot;none&quot;)</code></pre>
+<p><img src="/project/project3_files/figure-html/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="question-2.4-2-pts" class="section level3">
+<h3>Question 2.4: (2 pts)</h3>
+<div id="now-facet-by-diet.-is-it-clearer-from-this-plot-which-diet-is-the-best-no-real-right-answer-just-show-me-you-are-thinking-about-it." class="section level5">
+<h5>Now, facet by diet. Is it clearer from this plot which diet is the best? (No real right answer: Just show me you are thinking about it.)</h5>
+<pre class="r"><code># your code here</code></pre>
+<p>Diet 1 is the best and Diet 3 is the worst.</p>
+</div>
+</div>
+<div id="question-2.5-2-pts" class="section level3">
+<h3>Question 2.5: (2 pts)</h3>
+<div id="go-back-to-your-plot-from-question-2.1-and-fit-a-linear-regression-line-not-the-default-loess-to-the-chicks-in-each-diet-with-geom_smooth....-there-should-be-4-separate-straight-lines-one-for-each-diet-each-a-separate-color.-now-can-you-see-more-clearly-which-diet-results-in-greater-weight-does-the-effect-of-diet-on-weight-appear-to-depend-on-time" class="section level5">
+<h5>Go back to your plot from question 2.1 and fit a <em>linear regression line</em> (not the default <em>loess</em>!) to the chicks in each diet with <code>geom_smooth(...)</code>. There should be 4 separate straight lines, one for each diet, each a separate color. Now can you see more clearly which diet results in greater weight? Does the effect of diet on weight appear to depend on time?</h5>
+<pre class="r"><code>library(ggplot2)
+ggplot(data = ChickWeight, aes(x = Time, y = Weight)) + geom_point(size=2, alpha = .5) + ggtitle(&quot;Weight vs Time&quot;) + geom_smooth(method = &quot;lm&quot;, aes(group=ChickWeight$Diet, color = ChickWeight$Diet))</code></pre>
+<p><img src="/project/project3_files/figure-html/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="question-3.1-2-pts" class="section level3">
+<h3>Question 3.1: (2 pts)</h3>
+<div id="a-scatterplot-might-not-be-the-best-way-to-visualize-this-data-it-calls-attention-to-the-relationship-between-weight-and-time-but-it-can-be-hard-to-see-the-differences-between-diets.-a-more-traditional-approach-for-achieving-this-list-desideratum-would-be-to-a-barplot-of-group-means-with-standard-error-bars-showing---1-standard-error." class="section level5">
+<h5>A scatterplot might not be the best way to visualize this data: It calls attention to the relationship between weight and time, but it can be hard to see the differences between diets. A more traditional approach for achieving this list desideratum would be to a barplot of group means with standard error bars showing +/- 1 standard error.</h5>
+</div>
+<div id="create-a-plot-using-geom_bar-where-each-bars-height-corresponds-to-the-average-chick-weight-for-each-of-the-four-diet-conditions.-rename-the-y-axis-to-include-units-e.g.-with-scale_y_continuousname-with-ylab-with-labs-and-make-the-major-tick-marks-go-from-0-to-150-by-25-with-breaks." class="section level5">
+<h5>Create a plot using <code>geom_bar</code> where each bar’s height corresponds to the average chick weight for each of the four diet conditions. Rename the y-axis to include units (e.g., with scale_y_continuous(<code>name=</code>…), with ylab(…), with labs(…)) and make the major tick marks go from 0 to 150 by 25 (with <code>breaks=</code>).</h5>
+<pre class="r"><code>ggplot(ChickWeight, aes(x = Time, y = Weight, fill=ChickWeight$Diet))+geom_bar(position=&quot;dodge&quot;, aes(y=Weight), stat=&quot;summary&quot;, fun=mean)</code></pre>
+<p><img src="/project/project3_files/figure-html/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="pts" class="section level3">
+<h3>3.2 (3 pts)</h3>
+<div id="add-error-bars-showing-pm-1-se-using-geom_errorbarstatsummary.-make-the-error-bars-skinnier-by-adding-a-width-argument.-color-the-bars-not-the-error-bars-but-the-bar-chart-bars-by-diet-and-change-from-the-default-color-scheme-using-a-scale_fill_-or-a-scale_color_" class="section level5">
+<h5>Add error bars showing <span class="math inline">\(\pm 1\ SE\)</span> using <code>geom_errorbar(stat="summary")</code>. Make the error-bars skinnier by adding a <code>width=</code> argument. Color the bars (not the error bars, but the bar chart bars) by diet and change from the default color scheme using a <code>scale_fill_</code> or a <code>scale_color_</code></h5>
+<pre class="r"><code>ggplot(ChickWeight, aes(x = Time, y = Weight, fill=ChickWeight$Diet))+geom_bar(position=&quot;dodge&quot;, aes(y=Weight), stat=&quot;summary&quot;, fun=mean) + geom_errorbar(stat=&quot;summary&quot;, width=.5)</code></pre>
+<p><img src="/project/project3_files/figure-html/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="pts-1" class="section level3">
+<h3>3.3 (2 pts)</h3>
+<div id="take-your-code-from-3.2-and-replace-geom_bar-with-geom_point.-remove-the-breaks-argument-from-scale_y_continuous.-make-the-points-larger-and-color-them-all-red.-put-them-on-top-of-the-error-bars." class="section level5">
+<h5>Take your code from 3.2 and replace geom_bar() with geom_point. Remove the <code>breaks=</code> argument from <code>scale_y_continuous</code>. Make the points larger and color them all red. Put them <em>on top of</em> the error bars.</h5>
+<pre class="r"><code>ggplot(ChickWeight, aes(x = Time, y = Weight, fill=ChickWeight$Diet))+geom_point(position=&quot;dodge&quot;, color = &quot;red&quot;, aes(y=Weight), stat=&quot;summary&quot;, fun=mean)</code></pre>
+<p><img src="/project/project3_files/figure-html/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="bonus-question-1-pt" class="section level3">
+<h3>Bonus question (1 pt)</h3>
+<div id="go-back-to-your-plot-from-question-2.1.-color-the-points-by-diet.-now-find-a-way-e.g.-using-statsummary-and-funmean-to-plot-the-mean-chick-weight-at-each-time-point-colored-and-grouped-by-diet-i-would-use-either-geom_point-with-a-different-shapesize-than-the-rest-of-the-points-or-even-better-geom_step-but-there-are-lots-of-other-ways.-then-plot-the-overall-mean-chick-weight-at-each-time-point-i.e.-not-by-diet-on-top-again-using-stat_summary-make-it-a-different-color-size-or-shape-than-the-rest-of-the-points." class="section level5">
+<h5>Go back to your plot from question 2.1. Color the points by diet. Now, find a way (e.g., using <code>stat=summary</code> and <code>fun=mean</code>) to plot the mean chick weight at each time point, colored and grouped by diet (I would use either <code>geom_point</code> with a different shape/size than the rest of the points or, even better, <code>geom_step"</code>, but there are lots of other ways). Then, plot the <em>overall</em> mean chick weight at each time point (i.e., not by diet) on top, again using <code>stat_summary()</code> (make it a different color, size, or shape than the rest of the points).</h5>
+</div>
+<div id="we-wont-be-giving-any-hints-on-this-one-it-is-purely-for-bonus" class="section level5">
+<h5>We won’t be giving any hints on this one (it is purely for bonus)!</h5>
+<pre class="r"><code># your code here</code></pre>
+<pre><code>## R version 4.1.0 (2021-05-18)
+## Platform: x86_64-apple-darwin17.0 (64-bit)
+## Running under: macOS Big Sur 10.16
+## 
+## Matrix products: default
+## BLAS:   /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRblas.dylib
+## LAPACK: /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRlapack.dylib
+## 
+## locale:
+## [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+## [1] ggplot2_3.3.3
+## 
+## loaded via a namespace (and not attached):
+##  [1] highr_0.9         bslib_0.2.5.1     compiler_4.1.0    pillar_1.6.1     
+##  [5] jquerylib_0.1.4   tools_4.1.0       digest_0.6.27     lattice_0.20-44  
+##  [9] nlme_3.1-152      viridisLite_0.4.0 jsonlite_1.7.2    evaluate_0.14    
+## [13] lifecycle_1.0.0   tibble_3.1.2      gtable_0.3.0      mgcv_1.8-35      
+## [17] pkgconfig_2.0.3   rlang_0.4.11      Matrix_1.3-3      DBI_1.1.1        
+## [21] yaml_2.2.1        blogdown_0.20     xfun_0.23         withr_2.4.2      
+## [25] stringr_1.4.0     dplyr_1.0.6       knitr_1.33        generics_0.1.0   
+## [29] sass_0.4.0        vctrs_0.3.8       tidyselect_1.1.1  grid_4.1.0       
+## [33] glue_1.4.2        R6_2.5.0          fansi_0.5.0       rmarkdown_2.8    
+## [37] bookdown_0.22     farver_2.1.0      purrr_0.3.4       magrittr_2.0.1   
+## [41] splines_4.1.0     scales_1.1.1      htmltools_0.5.1.1 ellipsis_0.3.2   
+## [45] assertthat_0.2.1  colorspace_2.0-1  labeling_0.4.2    utf8_1.2.1       
+## [49] stringi_1.6.2     munsell_0.5.0     crayon_1.4.1</code></pre>
+<pre><code>## [1] &quot;2021-06-07 22:07:10 CDT&quot;</code></pre>
+<pre><code>##                                                                                            sysname 
+##                                                                                           &quot;Darwin&quot; 
+##                                                                                            release 
+##                                                                                           &quot;20.5.0&quot; 
+##                                                                                            version 
+## &quot;Darwin Kernel Version 20.5.0: Sat May  8 05:10:33 PDT 2021; root:xnu-7195.121.3~9/RELEASE_X86_64&quot; 
+##                                                                                           nodename 
+##                                                                            &quot;MacBook-Pro-100.local&quot; 
+##                                                                                            machine 
+##                                                                                           &quot;x86_64&quot; 
+##                                                                                              login 
+##                                                                                             &quot;root&quot; 
+##                                                                                               user 
+##                                                                                      &quot;AkshatPatni&quot; 
+##                                                                                     effective_user 
+##                                                                                      &quot;AkshatPatni&quot;</code></pre>
+</div>
+</div>
+</div>
+
+            
+        <hr>         <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div> 
+            </div>
+          </div>
+
+   <hr>  <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div> 
+        </div>
+      </div>
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="/js/docs.min.js"></script>
+<script src="/js/main.js"></script>
+
+<script src="/js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>
