@@ -1,0 +1,9 @@
+---
+title: "Mud Motor Failure Python Analysis"
+output: html_document
+hidedate: true
+hiderelated: true
+hidediscus: true
+---
+
+<body><div align="center"><iframe width="800" height="1000" src="/MudMotor_Project.pdf" frameborder="1px"></iframe></div></body>

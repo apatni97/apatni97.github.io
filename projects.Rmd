@@ -6,7 +6,9 @@ hiderelated: true
 hidediscus: true
 ---
 
-Check out some of my coding projects below:
+Check out some of my projects below:
+
+<i class="fa fa-cogs"></i> &nbsp; [Engineering: Using Python to analyze and predict Mud Motor Failures](/project/project7/)
 
 <i class="fa fa-stethoscope"></i> &nbsp; [Neuroscience: Using PEG Fusion to advance Nerve Repair](/project/project3/)
 

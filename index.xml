@@ -25,6 +25,15 @@
     </item>
     
     <item>
+      <title>Mud Motor Failure Python Analysis</title>
+      <link>/project/project7/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project7/</guid>
+      <description>      </description>
+    </item>
+    
+    <item>
       <title>OpenMP Parallel K-Means Research Paper</title>
       <link>/project/project5/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -58,7 +67,8 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/projects/</guid>
-      <description>  Check out some of my coding projects below:
+      <description>  Check out some of my projects below:
+ Engineering: Using Python to analyze and predict Mud Motor Failures
  Neuroscience: Using PEG Fusion to advance Nerve Repair
  Parallel Programming: K-Means Clustering Research Paper
  Parallel Programming: K-Means Clustering Source Code
